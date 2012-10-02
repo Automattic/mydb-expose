@@ -52,7 +52,7 @@ app.get('/some/doc', function(req, res){
 
   Points to the 
 
-### RequestSession
+### MySession
 
   Operations executed on the `session` object defer the response sent to
   the client automatically, unless a callback is passed to one of the
