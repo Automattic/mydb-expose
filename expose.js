@@ -133,7 +133,7 @@ Expose.prototype.sess = function(){
  */
 
 Expose.prototype.middleware = function expose(req, res, next){
-  if (!res.session) throw new Error('Missing `connect#session`.');
+  if (!req.session) throw new Error('Missing `connect#session`.');
 
   // keep track of req and res objects
   this.req = req;
