@@ -2,9 +2,11 @@
   "name": "mydb-expose",
   "version": "0.1.0",
   "description": "mydb express middleware",
+  "private": true,
   "dependencies": {
     "monk": "0.3.0",
-    "redis": "0.8.1"
+    "redis": "0.8.1",
+    "debug": "*"
   },
   "devDependencies": {
     "express": "3.0.0rc4",
