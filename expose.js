@@ -24,7 +24,7 @@ module.exports = Expose;
 function Expose(redis, mongo){
   this.redis = redis;
   this.mongo = mongo;
-  this.sessions = mongo.col('sessions');
+  this.sessions = mongo.get('sessions');
 }
 
 /**
