@@ -8,6 +8,12 @@ var Session = require('./session')
   , debug = require('debug')('mydb-expose');
 
 /**
+ * Module exports.
+ */
+
+module.exports = Expose;
+
+/**
  * Expose constructor.
  *
  * @param {RedisClient} redis client
