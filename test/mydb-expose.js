@@ -9,7 +9,7 @@ var mongo = 'localhost/mydb-expose-test' || process.env.MONGO_URI;
  * Test dependencies.
  */
 
-var my = require('mydb')
+var my = require('..')
   , monk = require('monk')(mongo)
   , redis = require('redis').createClient()
   , express = require('express')
@@ -42,9 +42,12 @@ describe('mydb-expose', function(){
   describe('middleware', function(){
     it('should fail if `connect#session` is not included', function(done){
       var app = express();
-      expect(function(){
-        app.use(mydb());
-      }).to.throwError(/missing `connect#session`/);
+      app.use(mydb());
+      app.use(function(err, req, res, next){
+        expect(err.message).to.match(/Missing `connect#session`/);
+        done();
+      });
+      request(app).get('/').expect(500).end(function(){});
     });
   });
 
