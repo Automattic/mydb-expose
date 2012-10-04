@@ -192,6 +192,6 @@ Expose.prototype.fn = function(){
  */
 
 function rand(){
-  var entropy = Date.now() + Math.random();
+  var entropy = String(Date.now()) + Math.random();
   return hash('md5').update(entropy).digest('hex');
 }
