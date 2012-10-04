@@ -1,5 +1,11 @@
 
 /**
+ * Module exports.
+ */
+
+module.exports = Session;
+
+/**
  * Noop.
  */
 
