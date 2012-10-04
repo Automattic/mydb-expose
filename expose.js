@@ -169,7 +169,7 @@ Expose.prototype.middleware = function expose(req, res, next){
 
 Expose.prototype.routes = function(next){
   if (/^\/session\/?(\?.*)?$/.test(this.req.url)) {
-    this.send(this.sessions.findOne(this.session._id));
+    this.res.send(this.sessions.findOne(this.req.session._id, '-sid'));
   } else {
     next();
   }
