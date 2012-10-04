@@ -101,15 +101,19 @@ Expose.prototype.send = function(){
  * Subscribes to the given document.
  *
  * @param {ObjectId|String} doc oid
+ * @param {Object} fields
  * @param {Function} callback
  * @api private
  */
 
-Expose.prototype.subscribe = function(id, fn){
+Expose.prototype.subscribe = function(id, fields, fn){
+  fields = fields || {};
   var sid = rand();
-  this.redis.setex(sid, 60 * 60 * 24, id, function(err){
+  var qry = { i: id };
+  if (Object.keys(fields).length) qry.f = fields;
+  this.redis.setex(sid, 60 * 60 * 24, JSON.stringify(qry), function(err){
     if (err) return fn(err);
-    debug('created subscription with id "%s" for doc "%s"', sid, id);
+    debug('created subscription "%s" for doc "%s" with fields %j', sid, id, fields);
     fn(null, sid);
   });
 };
