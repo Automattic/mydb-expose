@@ -25,6 +25,7 @@ function Expose(redis, mongo){
   this.redis = redis;
   this.mongo = mongo;
   this.sessions = mongo.get('sessions');
+  this.sessions.index('sid');
 }
 
 /**
