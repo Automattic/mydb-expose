@@ -34,6 +34,24 @@ function mydb(){
 }
 
 /**
+ * Returns the `cookieParser` middleware.
+ */
+
+function cookies(){
+  return express.cookieParser();
+};
+
+/**
+ * Returns the session middleware.
+ *
+ * @api private
+ */
+
+function session(){
+  return express.session({ secret: 'woot' });
+}
+
+/**
  * Test.
  */
 
@@ -59,36 +77,47 @@ describe('mydb-expose', function(){
 
     it('Collection#findOne', function(done){
       var app = express();
-      app.use(express.session());
+      app.use(cookies());
+      app.use(session());
       app.use(mydb());
       app.get('/doc', function(req, res){
         res.send(users.findOne(doc1._id));
       });
-      request(app).get('/doc').expect(doc1, done);
+      request(app).get('/doc').expect({
+        _id: doc1._id.toString(),
+        tobi: doc1.tobi
+      }, done);
     });
 
     it('Collection#find', function(done){
       var app = express();
-      app.use(express.session());
+      app.use(cookies());
+      app.use(session());
       app.use(mydb());
       app.get('/document', function(req, res){
         res.send(users.find({}));
       });
-      request(app).get('/document').expect([doc1, doc2], done);
+      request(app).get('/document').expect([
+        { _id: doc1._id.toString(), tobi: doc1.tobi },
+        { _id: doc2._id.toString(), jane: doc2.jane }
+      ], done);
     });
 
     it('Collection#findOne + mydb', function(done){
       var app = express();
-      app.use(express.session());
+      app.use(cookies());
+      app.use(session());
       app.use(mydb());
       app.get('/doc', function(req, res){
         res.send(users.findOne(doc1._id));
       });
       request(app).get('/doc?my=1').end(function(err, res){
         if (err) return done(err);
-        redis.get(res.text, function(err, id){
+        redis.get(res.text, function(err, data){
           if (err) return done(err);
-          expect(id).to.be(doc1._id.toString());
+          var obj = JSON.parse(data);
+          expect(obj.i).to.be(doc1._id.toString());
+          expect(obj.f).to.be(undefined);
           done();
         });
       });
@@ -96,16 +125,19 @@ describe('mydb-expose', function(){
 
     it('Collection#find + mydb', function(done){
       var app = express();
-      app.use(express.session());
+      app.use(cookies());
+      app.use(session());
       app.use(mydb());
       app.get('/doc', function(req, res){
         res.send(users.findOne(doc1._id));
       });
       request(app).get('/doc?my=1').end(function(err, res){
         if (err) return done(err);
-        redis.get(res.text, function(err, id){
+        redis.get(res.text, function(err, data){
           if (err) return done(err);
-          expect(id).to.be(doc1._id.toString());
+          var obj = JSON.parse(data);
+          expect(obj.i).to.be(doc1._id.toString());
+          expect(obj.f).to.be(undefined);
           done();
         });
       });
@@ -115,26 +147,25 @@ describe('mydb-expose', function(){
   describe('/session', function(){
     it('responds json', function(done){
       var app = express();
-      app.use(express.session());
+      app.use(cookies());
+      app.use(session());
       app.use(mydb());
       request(app).get('/session').end(function(err, res){
         if (err) return done(err);
 
-        // check document
-        var cookie = res.headers['set-cookie'].match(/connect\.sid=(\w+)/)[1];
-        expect(res.body._id).to.be.a('string');
-        expect(res.body.sid).to.be(cookie);
-
         // we first assert a session doc was created
         sessions.findOne(res.body._id, function(err, sess){
           if (err) return done(err);
-          expect(sess.sid).to.be(cookie);
+          expect(sess.sid).to.be.a('string');
 
           request(app)
-          .set('Cookie', res.headers['set-cookie'])
           .get('/session')
+          .set('Cookie', res.headers['set-cookie'][0].split(';')[0])
           .end(function(err, res){
             if (err) return done(err);
+            expect(res.body._id).to.be(sess._id.toString());
+            expect(res.body.sid).to.be(undefined);
+            done();
           });
         });
       });
@@ -142,10 +173,11 @@ describe('mydb-expose', function(){
 
     it('responds with sid for mydb', function(done){
       var app = express();
-      app.use(express.session());
+      app.use(cookies());
+      app.use(session());
       app.use(mydb());
       app.get('/', function(req, res, next){
-        res.send(req.sessionId);
+        res.send(req.sessionID);
       });
 
       request(app).get('/').end(function(err, res){
@@ -153,13 +185,15 @@ describe('mydb-expose', function(){
         var sid = res.text;
 
         request(app)
-        .set('Cookie', res.headers['set-cookie'])
         .get('/session?my=1')
+        .set('Cookie', res.headers['set-cookie'][0].split(';')[0])
         .end(function(err, res){
           if (err) return done(err);
-          redis.get(res.text, function(err, id){
+          redis.get(res.text, function(err, data){
             if (err) return done(err);
-            sessions.findById(id, function(err, session){
+            var obj = JSON.parse(data);
+            expect(obj.f).to.eql({ sid: 0 });
+            sessions.findById(obj.i, function(err, session){
               if (err) return done(err);
               expect(session.sid).to.be(sid);
               done();
@@ -173,10 +207,11 @@ describe('mydb-expose', function(){
   describe('req#session', function(){
     it('automatically populated', function(done){
       var app = express();
-      app.use(express.session());
+      app.use(cookies());
+      app.use(session());
       app.use(mydb());
       app.get('/', function(req, res, next){
-        expect(req.session.sid).to.eql(req.sessionId);
+        expect(req.session.sid).to.eql(req.sessionID);
         res.send('' + req.session._id);
       });
       app.get('/2', function(req, res, next){
@@ -185,8 +220,8 @@ describe('mydb-expose', function(){
       request(app).get('/').expect(200).end(function(err, res1){
         if (err) return done(err);
         request(app)
-        .set('Cookie', res1.headers['set-cookie'])
         .get('/')
+        .set('Cookie', res1.headers['set-cookie'][0].split(';')[0])
         .expect(200).end(function(err, res2){
           expect(res1.text).to.be(res2.text);
           done();
@@ -196,7 +231,8 @@ describe('mydb-expose', function(){
 
     it('supports operations', function(done){
       var app = express();
-      app.use(express.session());
+      app.use(cookies());
+      app.use(session());
       app.use(mydb());
       app.get('/', function(req, res, next){
         res.send(200);
@@ -208,19 +244,19 @@ describe('mydb-expose', function(){
       });
       app.get('/3', function(req, res, next){
         expect(req.session.woot).to.be('a');
-        expect(req.sesison.likes).to.eql(['ferrets']);
+        expect(req.session.likes).to.eql(['ferrets']);
         res.send(200);
       });
       request(app).get('/').expect(200).end(function(err, res){
         if (err) return done(err);
         request(app)
-        .set('Cookie', res.headers['set-cookie'])
         .get('/2')
+        .set('Cookie', res.headers['set-cookie'][0].split(';')[0])
         .end(function(err){
           if (err) return done(err);
           request(app)
-          .set('Cookie', res.headers['set-cookie'])
           .get('/3')
+          .set('Cookie', res.headers['set-cookie'][0].split(';')[0])
           .expect(200, done);
         });
       });
