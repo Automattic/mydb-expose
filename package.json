@@ -4,7 +4,7 @@
   "description": "mydb express middleware",
   "private": true,
   "dependencies": {
-    "monk": "0.4.0",
+    "monk": "0.5.0",
     "redis": "0.8.1",
     "debug": "*"
   },
