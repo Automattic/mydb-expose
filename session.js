@@ -61,11 +61,11 @@ Session.prototype.$buffer = function(op, obj){
 Session.prototype.reload = function(fn){
   fn = fn || noop;
   var self = this;
-  var qry = { sid: this.req.sessionId };
+  var qry = { sid: this.$req.originalSession.id };
   var opts = { upsert: true };
-  this.col.findAndModify(qry, qry, opts, function(err, obj){
+  this.$col.findAndModify(qry, { $set: qry }, opts, function(err, obj){
     if (err) return fn(err);
-    var keys = this.$keys;
+    var keys = self.$keys;
     for (var i = 0; i < keys.length; i++) delete self[keys[i]];
     for (var i in obj) self[i] = obj[i];
     self.$keys = Object.keys(obj);
