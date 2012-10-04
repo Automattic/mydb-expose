@@ -82,9 +82,7 @@ Session.prototype.reload = function(fn){
 Session.prototype.save = function(fn){
   fn = fn || noop;
   if (!this._id) return fn(new Error('Session not properly loaded'));
-  this.$col.update(this._id, function(err){
-    if (err) return fn(err);
-  });
+  this.$query(this.$qry, fn);
 };
 
 /**
@@ -106,6 +104,19 @@ Session.prototype.regenerate = function(fn){
 };
 
 /**
+ * Runs a query directly.
+ *
+ * @param {Object} query
+ * @param {Function} callback
+ * @api private
+ */
+
+Session.prototype.$query = function(qry, fn){
+  if (!this._id) return fn(new Error('Session not properly loaded'));
+  this.$col.update(this._id, qry, fn);
+};
+
+/**
  * Sets `key` to `val`.
  *
  * @param {String} key
@@ -119,7 +130,7 @@ Session.prototype.set = function(key, val, fn){
   op[key] = val;
 
   if (fn) {
-    this.query({ $set: op }, fn);
+    this.$query({ $set: op }, fn);
   } else {
     this.$buffer('$set', op);
   }
@@ -161,7 +172,7 @@ Session.prototype.shift = function(key, fn){
   op[key] = -1;
 
   if (fn) {
-    this.query({ $pop: op }, fn);
+    this.$query({ $pop: op }, fn);
   } else {
     this.$buffer('$pop', op);
   }
