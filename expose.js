@@ -125,7 +125,7 @@ Expose.prototype.subscribe = function(id, fields, fn){
  */
 
 Expose.prototype.sess = function(){
-  var session = new Session(this.monk, this.req);
+  var session = new Session(this.sessions, this.req);
   this.req.originalSession = this.req.session;
   return session;
 };
