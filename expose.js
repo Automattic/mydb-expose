@@ -41,7 +41,7 @@ Expose.prototype.end = function(){
   var end = this.res.end;
   var next = this.next;
 
-  return function end(data, encoding){
+  return function(data, encoding){
     res.end = end;
 
     if (req.session.$dirty()) {
@@ -72,20 +72,23 @@ Expose.prototype.send = function(){
   var next = res.next;
   var self = this;
 
-  return function send(data){
+  return function(data){
     res.send = send;
 
     if ('object' == typeof data && data.fulfill) {
+      debug('handling res#send promise');
       data.once('complete', function(err, doc){
         if (err) return next(err);
+        debug('promise success');
         if (null != req.query.my) {
           if (!doc._id) return res.send(501);
-          self.subscribe(doc._id, function(err, id){
+          self.subscribe(doc._id, data.opts.fields, function(err, id){
             if (err) return next(err);
             res.send(id);
           });
         } else {
-          res.send(data);
+          debug('sending mongo doc json');
+          res.send(doc);
         }
       });
     } else {
