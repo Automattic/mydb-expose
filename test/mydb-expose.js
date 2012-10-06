@@ -20,7 +20,8 @@ var my = require('..')
  * Test collection.
  */
 
-var users = monk.get('users-' + Date.now());
+var colName = 'users-' + Date.now();
+var users = monk.get(colName);
 var sessions = monk.get('sessions');
 
 /**
@@ -118,6 +119,7 @@ describe('mydb-expose', function(){
           var obj = JSON.parse(data);
           expect(obj.i).to.be(doc1._id.toString());
           expect(obj.f).to.be(undefined);
+          expect(obj.c).to.be(colName);
           done();
         });
       });
@@ -138,6 +140,7 @@ describe('mydb-expose', function(){
           var obj = JSON.parse(data);
           expect(obj.i).to.be(doc1._id.toString());
           expect(obj.f).to.be(undefined);
+          expect(obj.c).to.be(colName);
           done();
         });
       });
@@ -193,6 +196,7 @@ describe('mydb-expose', function(){
             if (err) return done(err);
             var obj = JSON.parse(data);
             expect(obj.f).to.eql({ sid: 0 });
+            expect(obj.c).to.be('sessions');
             sessions.findById(obj.i, function(err, session){
               if (err) return done(err);
               expect(session.sid).to.be(sid);
