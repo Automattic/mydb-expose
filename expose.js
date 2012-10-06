@@ -82,7 +82,7 @@ Expose.prototype.send = function(){
         debug('promise success');
         if (null != req.query.my) {
           if (!doc._id) return res.send(501);
-          self.subscribe(doc._id, data.opts.fields, function(err, id){
+          self.subscribe(data.col.name, doc._id, data.opts.fields, function(err, id){
             if (err) return next(err);
             res.send(id);
           });
@@ -100,17 +100,19 @@ Expose.prototype.send = function(){
 /**
  * Subscribes to the given document.
  *
+ * @param {String} collection name
  * @param {ObjectId|String} doc oid
  * @param {Object} fields
  * @param {Function} callback
  * @api private
  */
 
-Expose.prototype.subscribe = function(id, fields, fn){
+Expose.prototype.subscribe = function(col, id, fields, fn){
   fields = fields || {};
   var sid = rand();
   var qry = { i: id };
   if (Object.keys(fields).length) qry.f = fields;
+  qry.c = col;
   this.redis.setex(sid, 60 * 60 * 24, JSON.stringify(qry), function(err){
     if (err) return fn(err);
     debug('created subscription "%s" for doc "%s" with fields %j', sid, id, fields);
