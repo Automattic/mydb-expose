@@ -33,7 +33,7 @@ function mydb(opts){
 
   // mongodb
   if ('object' != typeof opts.mongo) {
-    opts.mongo = monk(opts.mongo || 'localhost/27017');
+    opts.mongo = monk(opts.mongo || 'localhost:27017/mydb');
   }
 
   // create middleware
