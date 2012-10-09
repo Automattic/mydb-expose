@@ -1,4 +1,10 @@
 
+0.3.0 / 2012-10-09
+==================
+
+  * expose: send 404 when promise resolves to nothing
+  * Makefile: tweak `slow`
+
 0.2.1 / 2012-10-07
 ==================
 
