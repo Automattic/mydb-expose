@@ -145,6 +145,21 @@ describe('mydb-expose', function(){
         });
       });
     });
+
+    it('Collection#find + 404', function(done){
+      var app = express();
+      app.use(cookies());
+      app.use(session());
+      app.use(mydb());
+      app.get('/-m-doc', function(req, res){
+        res.send(users.findOne({ asd: 'testing testing 404' }));
+      });
+      request(app).get('/-m-doc').end(function(err, res){
+        if (err) return done(err);
+        expect(res.status).to.be(404);
+        done();
+      });
+    });
   });
 
   describe('/session', function(){

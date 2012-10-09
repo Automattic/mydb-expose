@@ -80,6 +80,7 @@ Expose.prototype.send = function(){
       data.once('complete', function(err, doc){
         if (err) return next(err);
         debug('promise success');
+        if (!doc) return res.send(404);
         if (null != req.query.my) {
           if (!doc._id) return res.send(501);
           self.subscribe(data.col.name, doc._id, data.opts.fields, function(err, id){
