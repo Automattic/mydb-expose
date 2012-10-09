@@ -1,4 +1,9 @@
 
+0.4.0 / 2012-10-09
+==================
+
+  * expose: hash collection and id with sessionID
+
 0.3.0 / 2012-10-09
 ==================
 
