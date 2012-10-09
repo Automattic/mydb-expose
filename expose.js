@@ -110,10 +110,16 @@ Expose.prototype.send = function(){
 
 Expose.prototype.subscribe = function(col, id, fields, fn){
   fields = fields || {};
-  var sid = rand();
+
+  // consistent hashing per client for a unique collection/id combination
+  var uid = ('.' + col + '.' + id).toLowerCase();
+  var sid = md5(this.req.originalSession.id + uid);
+
+  // store down query
   var qry = { i: id };
   if (Object.keys(fields).length) qry.f = fields;
   qry.c = col;
+
   this.redis.setex(sid, 60 * 60 * 24, JSON.stringify(qry), function(err){
     if (err) return fn(err);
     debug('created subscription "%s" for doc "%s" with fields %j', sid, id, fields);
@@ -189,12 +195,12 @@ Expose.prototype.fn = function(){
 };
 
 /**
- * Returns a random id for the subscription.
+ * MD5 helper.
  *
+ * @param {String} text
  * @api private
  */
 
-function rand(){
-  var entropy = String(Date.now()) + Math.random();
-  return hash('md5').update(entropy).digest('hex');
+function md5(text){
+  return hash('md5').update(text).digest('hex');
 }
