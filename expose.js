@@ -152,6 +152,12 @@ Expose.prototype.sess = function(){
 Expose.prototype.middleware = function expose(req, res, next){
   if (!req.session) throw new Error('Missing `connect#session`.');
 
+  // prevent double middleware
+  if (req.mydb) {
+    debug('skipping - mydb-expose already mounted');
+    return next();
+  }
+
   // keep track of req and res objects
   this.req = req;
   this.res = res;
