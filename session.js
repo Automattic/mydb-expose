@@ -25,6 +25,11 @@ function Session(col, req){
   this.$req = req;
   this.$qry = {};
   this.$keys = [];
+
+  // copy properties from the original session
+  for (var i in req.session){
+    if (!this[i]) this[i] = req.session[i];
+  }
 }
 
 /**
