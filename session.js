@@ -251,6 +251,28 @@ Session.prototype.push = function(key, val, fn){
 };
 
 /**
+ * Pushes `val` to `key` (set).
+ *
+ * @param {String} key
+ * @param {Object} value to push
+ * @param {Function} optional, callback
+ * @api public
+ */
+
+Session.prototype.addToSet = function(key, val, fn){
+  var op = {};
+  op[key] = val;
+
+  if (fn) {
+    this.$query({ $addToSet: op }, fn);
+  } else {
+    this.$buffer('$addToSet', op);
+  }
+
+  return this;
+};
+
+/**
  * Pushes `vals` to `key`.
  *
  * @param {String} key
