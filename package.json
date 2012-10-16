@@ -1,6 +1,6 @@
 {
   "name": "mydb-expose",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "description": "mydb express middleware",
   "private": true,
   "dependencies": {
