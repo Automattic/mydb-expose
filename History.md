@@ -1,4 +1,10 @@
 
+0.6.0 / 2012-10-17
+==================
+
+  * index: added `sessionExpose` opt
+  * expose: implement custom session fields
+
 0.5.0 / 2012-10-16
 ==================
 
