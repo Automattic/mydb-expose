@@ -36,7 +36,11 @@ function mydb(opts){
     opts.mongo = monk(opts.mongo || 'localhost:27017/mydb');
   }
 
+  // session exposed fields
+  // XXX: move into `mydb-session`
+  var expose = opts.sessionExpose || '-sid';
+
   // create middleware
-  var expose = new Expose(opts.redis, opts.mongo);
+  var expose = new Expose(opts.redis, opts.mongo, expose);
   return expose.fn();
 }
