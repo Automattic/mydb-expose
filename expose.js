@@ -18,14 +18,16 @@ module.exports = Expose;
  *
  * @param {RedisClient} redis client
  * @param {Monk.Manager} mongodb client
+ * @param {String|Array|Object} session fields to expose
  * @api public
  */
 
-function Expose(redis, mongo){
+function Expose(redis, mongo, expose){
   this.redis = redis;
   this.mongo = mongo;
   this.sessions = mongo.get('sessions');
   this.sessions.index('sid');
+  this.sessionExpose = expose;
 }
 
 /**
@@ -184,7 +186,10 @@ Expose.prototype.middleware = function expose(req, res, next){
 
 Expose.prototype.routes = function(next){
   if (/^\/session\/?(\?.*)?$/.test(this.req.url)) {
-    this.res.send(this.sessions.findOne(this.req.session._id, '-sid'));
+    var col = this.sessions;
+    var sid = this.req.session._id;
+    var pro = col.findOne(sid, this.sessionExpose);
+    this.res.send(pro);
   } else {
     next();
   }
