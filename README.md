@@ -40,6 +40,8 @@ app.get('/some/doc', function(req, res){
   - `mongo`
     - a `monk` instance
     - a string like `localhost:27017/test`
+  - `sessionExpose`
+    - fields to expose from the session document (defaults to `'-sid'`)
 
 ### ServerResponse#send
 
