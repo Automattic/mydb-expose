@@ -113,14 +113,15 @@ Expose.prototype.send = function(){
 Expose.prototype.subscribe = function(col, id, fields, fn){
   fields = fields || {};
 
-  // consistent hashing per client for a unique collection/id combination
-  var uid = ('.' + col + '.' + id).toLowerCase();
-  var sid = md5(this.req.originalSession.id + uid);
-
   // store down query
   var qry = { i: id };
   if (Object.keys(fields).length) qry.f = fields;
   qry.c = col;
+
+  // consistent hashing per client for a collection/id/fields combination
+  var fields = JSON.stringify(qry.f);
+  var uid = ('.' + col + '.' + id + '.' + fields).toLowerCase();
+  var sid = md5(this.req.originalSession.id + uid);
 
   this.redis.setex(sid, 60 * 60 * 24, JSON.stringify(qry), function(err){
     if (err) return fn(err);
