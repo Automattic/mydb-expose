@@ -71,7 +71,7 @@ Expose.prototype.send = function(){
   var req = this.req;
   var res = this.res;
   var send = res.send;
-  var next = res.next;
+  var next = req.next;
   var self = this;
 
   return function(data){
