@@ -153,13 +153,14 @@ Expose.prototype.sess = function(){
  */
 
 Expose.prototype.middleware = function expose(req, res, next){
-  if (!req.session) throw new Error('Missing `connect#session`.');
-
   // prevent double middleware
   if (req.mydb) {
     debug('skipping - mydb-expose already mounted');
     return next();
   }
+
+  // setup shortcut to instance
+  req.mydb = res.mydb = this;
 
   // keep track of req and res objects
   this.req = req;
@@ -169,13 +170,17 @@ Expose.prototype.middleware = function expose(req, res, next){
   // setup overrides
   res.end = this.end();
   res.send = this.send();
-  req.session = this.sess();
 
-  // setup shortcut to instance
-  req.mydb = res.mydb = this;
+  if (req.session) {
+    // session object
+    req.session = this.sess();
 
-  // populates the session and moves on
-  req.session.reload(this.routes.bind(this, next));
+    // populates the session and moves on
+    req.session.reload(this.routes.bind(this, next));
+  } else {
+    debug('no session - skipping');
+    next();
+  }
 };
 
 /**

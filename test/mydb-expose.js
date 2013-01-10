@@ -58,18 +58,6 @@ function session(){
 
 describe('mydb-expose', function(){
 
-  describe('middleware', function(){
-    it('should fail if `connect#session` is not included', function(done){
-      var app = express();
-      app.use(mydb());
-      app.use(function(err, req, res, next){
-        expect(err.message).to.match(/Missing `connect#session`/);
-        done();
-      });
-      request(app).get('/').expect(500).end(function(){});
-    });
-  });
-
   describe('res#send', function(){
     var doc1 = { _id: users.id(), tobi: 'rox' };
     var doc2 = { _id: users.id(), jane: 'too' };
