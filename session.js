@@ -1,5 +1,11 @@
 
 /**
+ * Module dependencies.
+ */
+
+var debug = require('debug')('mydb-expose:session');
+
+/**
  * Module exports.
  */
 
@@ -87,6 +93,7 @@ Session.prototype.reload = function(fn){
 Session.prototype.save = function(fn){
   fn = fn || noop;
   if (!this._id) return fn(new Error('Session not properly loaded'));
+  debug('saving');
   this.$query(this.$qry, fn);
 };
 
@@ -101,6 +108,7 @@ Session.prototype.regenerate = function(fn){
   fn = fn || noop;
   var self = this;
   this.$qry = {};
+  debug('regenerating');
   this.$req.originalSession.regenerate(function(err){
     if (err) return fn(err);
     self.reload(fn);
@@ -135,8 +143,10 @@ Session.prototype.set = function(key, val, fn){
   op[key] = val;
 
   if (fn) {
+    debug('set %s : %j', key, val);
     this.$query({ $set: op }, fn);
   } else {
+    debug('buffered set %s : %j', key, val);
     this.$buffer('$set', op);
   }
 
@@ -156,8 +166,10 @@ Session.prototype.pop = function(key, fn){
   op[key] = 1;
 
   if (fn) {
+    debug('pop %s', key);
     this.$query({ $pop: op }, fn);
   } else {
+    debug('buffered pop %s', key);
     this.$buffer('$pop', op);
   }
 
@@ -177,8 +189,10 @@ Session.prototype.shift = function(key, fn){
   op[key] = -1;
 
   if (fn) {
+    debug('shift %s', op);
     this.$query({ $pop: op }, fn);
   } else {
+    debug('buffered shift %s', op);
     this.$buffer('$pop', op);
   }
 
@@ -198,8 +212,10 @@ Session.prototype.unset = function(key, fn){
   op[key] = 1;
 
   if (fn) {
+    debug('unset %s', key);
     this.$query({ $unset: op }, fn);
   } else {
+    debug('buffered unset %s', key);
     this.$buffer('$unset', op);
   }
 
@@ -220,8 +236,10 @@ Session.prototype.rename = function(key, key2, fn){
   op[key] = key2;
 
   if (fn) {
+    debug('rename %s to %s', key, key2);
     this.$query({ $rename: op }, fn);
   } else {
+    debug('buffered rename %s to %s', key, key2);
     this.$buffer('$rename', op);
   }
 
@@ -242,8 +260,10 @@ Session.prototype.push = function(key, val, fn){
   op[key] = val;
 
   if (fn) {
+    debug('push %s %j', key, val);
     this.$query({ $push: op }, fn);
   } else {
+    debug('buffered push %s %j', key, val);
     this.$buffer('$push', op);
   }
 
@@ -264,8 +284,10 @@ Session.prototype.addToSet = function(key, val, fn){
   op[key] = val;
 
   if (fn) {
+    debug('add to set %s %j', key, val);
     this.$query({ $addToSet: op }, fn);
   } else {
+    debug('buffered add to set %s %j', key, val);
     this.$buffer('$addToSet', op);
   }
 
@@ -286,8 +308,10 @@ Session.prototype.pushAll = function(key, vals, fn){
   op[key] = vals;
 
   if (fn) {
+    debug('push all %s %j', key, vals);
     this.$query({ $pushAll: op }, fn);
   } else {
+    debug('buffered push all %s %j', key, vals);
     this.$buffer('$pushAll', op);
   }
 
@@ -308,8 +332,10 @@ Session.prototype.pull = function(key, val, fn){
   op[key] = val;
 
   if (fn) {
+    debug('pull %s %j', key, val);
     this.$query({ $pull: op }, fn);
   } else {
+    debug('buffered pull %s %j', key, val);
     this.$buffer('$pull', op);
   }
 
@@ -330,8 +356,10 @@ Session.prototype.pullAll = function(key, vals, fn){
   op[key] = vals;
 
   if (fn) {
+    debug('pull all %s %j', key, vals);
     this.$query({ $pullAll: op }, fn);
   } else {
+    debug('buffered pull all %s %j', key, vals);
     this.$buffer('$pullAll', op);
   }
 
