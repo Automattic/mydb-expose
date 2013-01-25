@@ -367,3 +367,15 @@ Session.prototype.pullAll = function(key, vals, fn){
 
   return this;
 };
+
+Session.prototype.toJSON = function(){
+  var obj = {};
+
+  for (var key in this) {
+    if (!this.hasOwnProperty(key)) continue;
+    obj[key] = this[key];
+  }
+
+  delete obj.$req;
+  return obj;
+};
