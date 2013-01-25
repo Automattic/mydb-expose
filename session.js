@@ -368,6 +368,13 @@ Session.prototype.pullAll = function(key, vals, fn){
   return this;
 };
 
+/**
+ * Return JSON representation.
+ *
+ * @return {Object}
+ * @api public
+ */
+
 Session.prototype.toJSON = function(){
   var obj = {};
 
