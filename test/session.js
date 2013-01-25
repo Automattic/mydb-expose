@@ -13,9 +13,6 @@ describe('Session#toJSON()', function(){
     var sess = new Session('users', req);
 
     expect(sess.toJSON()).to.eql({
-      $col: 'users',
-      $qry: {},
-      $keys: [],
       first: 'tobi',
       last: 'ferret'
     });

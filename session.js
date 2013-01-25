@@ -380,9 +380,9 @@ Session.prototype.toJSON = function(){
 
   for (var key in this) {
     if (!this.hasOwnProperty(key)) continue;
+    if ('$' == key[0]) continue;
     obj[key] = this[key];
   }
 
-  delete obj.$req;
   return obj;
 };
