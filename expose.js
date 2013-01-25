@@ -174,6 +174,7 @@ Expose.prototype.middleware = function expose(req, res, next){
   if (req.session) {
     // session object
     req.session = this.sess();
+    debug('assign req.session %j', req.session);
 
     // populates the session and moves on
     req.session.reload(this.routes.bind(this, next));
