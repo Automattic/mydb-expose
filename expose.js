@@ -177,7 +177,11 @@ Expose.prototype.middleware = function expose(req, res, next){
     debug('assign req.session %j', req.session);
 
     // populates the session and moves on
-    req.session.reload(this.routes.bind(this, next));
+    var self = this;
+    req.session.reload(function(err){
+      if (err) return next(err);
+      self.routes(next);
+    });
   } else {
     debug('no session - skipping');
     next();
