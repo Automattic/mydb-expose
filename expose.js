@@ -79,21 +79,27 @@ Expose.prototype.send = function(){
 
     if ('object' == typeof data && data.fulfill) {
       debug('handling res#send promise');
-      data.once('complete', function(err, doc){
-        if (err) return next(err);
-        debug('promise success');
-        if (!doc) return res.send(404);
-        if (null != req.query.my) {
-          if (!doc._id) return res.send(501);
-          self.subscribe(data.col.name, doc._id, data.opts.fields, function(err, id){
-            if (err) return next(err);
-            res.send(id);
-          });
-        } else {
-          debug('sending mongo doc json');
+      if (null != req.query.my) {
+        debug('mydb - subscribing');
+        self.subscribe(data, function(err, doc, id){
+          if (err) return next(err);
+
+          if (id == req.get('X-MyDB-Id')) {
+            debug('subscription id matches one provided by client');
+            res.send(304);
+          } else {
+            debug('sending new subscription with document');
+            res.set('X-MyDB-Id', id);
+            res.send(doc);
+          }
+        });
+      } else {
+        debug('no mydb - not subscribing');
+        data.once('complete', function(err, doc){
+          if (err) return next(err);
           res.send(doc);
-        }
-      });
+        });
+      }
     } else {
       res.send.apply(res, arguments);
     }
