@@ -107,6 +107,32 @@ Expose.prototype.send = function(){
 };
 
 /**
+ * Fetches a document from a promise.
+ *
+ * @param {Promise} promise
+ * @param {Function} callback
+ * @api public
+ */
+
+Expose.prototype.subscribe = function(promise, fields, fn){
+  if ('function' == typeof fields) {
+    fn = fields;
+    fields = null;
+  }
+
+  var self = this;
+
+  promise.once('complete', function(err, doc){
+    if (err) return fn(err);
+    if (!doc._id) return fn(new Error('Document not found'));
+    self.doSubscribe(promise.col, doc._id, fields, function(err, sid){
+      if (err) return fn(err);
+      fn(null, doc, sid);
+    });
+  });
+};
+
+/**
  * Subscribes to the given document.
  *
  * @param {String} collection name
