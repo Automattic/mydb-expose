@@ -108,6 +108,7 @@ Expose.prototype.send = function(){
         debug('no mydb - not subscribing');
         data.once('complete', function(err, doc){
           if (err) return next(err);
+          if (!doc) return res.send(404);
           res.send(doc);
         });
       }
