@@ -9,12 +9,12 @@ var mongo = 'localhost/mydb-expose-test' || process.env.MONGO_URI;
  * Test dependencies.
  */
 
-var my = require('..')
-  , monk = require('monk')(mongo)
-  , redis = require('redis').createClient()
-  , express = require('express')
-  , expect = require('expect.js')
-  , request = require('supertest');
+var my = require('..');
+var monk = require('monk')(mongo);
+var redis = require('redis').createClient();
+var express = require('express');
+var expect = require('expect.js');
+var request = require('supertest');
 
 /**
  * Test collection.
