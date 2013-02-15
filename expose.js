@@ -3,9 +3,12 @@
  * Module dependencies.
  */
 
-var Session = require('./session')
-  , hash = require('crypto').createHash
-  , debug = require('debug')('mydb-expose');
+var Session = require('./session');
+var qs = require('querystring');
+var url = require('url');
+var hash = require('crypto').createHash;
+var uid = require('uid2');
+var debug = require('debug')('mydb-expose');
 
 /**
  * Module exports.
