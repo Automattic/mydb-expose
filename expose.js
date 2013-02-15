@@ -82,7 +82,7 @@ Expose.prototype.send = function(){
 
     if ('object' == typeof data && data.fulfill) {
       debug('handling res#send promise');
-      if (req.get('X-MyDb-SocketId')) {
+      if (req.get('X-MyDB-SocketId')) {
         debug('mydb - subscribing');
         self.subscribe(data, function(err, doc, id){
           if (err) return next(err);
