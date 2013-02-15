@@ -85,7 +85,15 @@ Expose.prototype.send = function(){
       if (req.get('X-MyDB-SocketId')) {
         debug('mydb - subscribing');
         self.subscribe(data, function(err, doc, id){
-          if (err) return next(err);
+          if (err) {
+            if ('Not found' == err.message) {
+              return res.send(404);
+            } else {
+              return next(err);
+            }
+          } else {
+            return next(err);
+          }
 
           if (id == req.get('X-MyDB-Id')) {
             debug('subscription id matches one provided by client');
