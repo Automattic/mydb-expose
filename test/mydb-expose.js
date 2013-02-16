@@ -179,11 +179,12 @@ describe('mydb-expose', function(){
 
         request(app)
         .get('/session?my=1')
+        .set('X-MyDB-SocketId', 'woot')
         .set('Cookie', res.headers['set-cookie'][0].split(';')[0])
         .end(function(err, res){
           if (err) return done(err);
           expect(res.body._id).to.be.a('string');
-          expect(res.get('X-MyDB-Id')).to.be.a('string');
+          expect(res.headers['x-mydb-id']).to.be.a('string');
           done();
         });
       });
