@@ -164,7 +164,7 @@ describe('mydb-expose', function(){
       });
     });
 
-    it('responds with sid for mydb', function(done){
+    it('responds with a mydb id', function(done){
       var app = express();
       app.use(cookies());
       app.use(session());
@@ -182,17 +182,9 @@ describe('mydb-expose', function(){
         .set('Cookie', res.headers['set-cookie'][0].split(';')[0])
         .end(function(err, res){
           if (err) return done(err);
-          redis.get(res.text, function(err, data){
-            if (err) return done(err);
-            var obj = JSON.parse(data);
-            expect(obj.f).to.eql({ sid: 0 });
-            expect(obj.c).to.be('sessions');
-            sessions.findById(obj.i, function(err, session){
-              if (err) return done(err);
-              expect(session.sid).to.be(sid);
-              done();
-            });
-          });
+          expect(res.body._id).to.be.a('string');
+          expect(res.get('X-MyDB-Id')).to.be.a('string');
+          done();
         });
       });
     });
