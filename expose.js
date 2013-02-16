@@ -217,6 +217,12 @@ Expose.prototype.middleware = function expose(req, res, next){
   this.res = res;
   this.next = next;
 
+  // generate a socketid if one is not set
+  this.socketid = req.get('X-MyDB-SocketId');
+  if (!this.socketid) {
+    this.socketid = uid(20);
+  }
+
   // setup overrides
   res.end = this.end();
   res.send = this.send();
