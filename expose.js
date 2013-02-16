@@ -87,12 +87,11 @@ Expose.prototype.send = function(){
         self.subscribe(data, function(err, doc, id){
           if (err) {
             if ('Not found' == err.message) {
+              debug('doc not found - sending 404');
               return res.send(404);
             } else {
               return next(err);
             }
-          } else {
-            return next(err);
           }
 
           if (id == req.get('X-MyDB-Id')) {
