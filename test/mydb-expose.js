@@ -124,10 +124,12 @@ describe('mydb-expose', function(){
       app.use(cookies());
       app.use(session());
       app.use(mydb());
-      app.get('/-m-doc', function(req, res){
+      app.get('/missing-doc', function(req, res){
         res.send(users.findOne({ asd: 'testing testing 404' }));
       });
-      request(app).get('/-m-doc').end(function(err, res){
+      request(app)
+      .get('/missing-doc')
+      .end(function(err, res){
         if (err) return done(err);
         expect(res.status).to.be(404);
         done();
