@@ -100,37 +100,22 @@ describe('mydb-expose', function(){
       app.get('/doc', function(req, res){
         res.send(users.findOne(doc1._id));
       });
-      request(app).get('/doc?my=1').end(function(err, res){
-        if (err) return done(err);
-        redis.get(res.text, function(err, data){
-          if (err) return done(err);
-          var obj = JSON.parse(data);
-          expect(obj.i).to.be(doc1._id.toString());
-          expect(obj.f).to.be(undefined);
-          expect(obj.c).to.be(colName);
+      redis.subscribe('MYDB_SUBSCRIBE', function(){
+        redis.on('message', function(channel, data){
+          expect(channel).to.be('MYDB_SUBSCRIBE');
+          data = JSON.parse(data);
+          expect(data.s).to.be('woot');
+          expect(data.c.substr(0, 6)).to.be('users-');
+          expect(data.i).to.be.a('string');
+          expect(data.h).to.be.a('string');
           done();
         });
       });
-    });
-
-    it('Collection#find + mydb', function(done){
-      var app = express();
-      app.use(cookies());
-      app.use(session());
-      app.use(mydb());
-      app.get('/doc', function(req, res){
-        res.send(users.findOne(doc1._id));
-      });
-      request(app).get('/doc?my=1').end(function(err, res){
+      request(app)
+      .get('/doc')
+      .set('X-MyDb-SocketId', 'woot')
+      .end(function(err, res){
         if (err) return done(err);
-        redis.get(res.text, function(err, data){
-          if (err) return done(err);
-          var obj = JSON.parse(data);
-          expect(obj.i).to.be(doc1._id.toString());
-          expect(obj.f).to.be(undefined);
-          expect(obj.c).to.be(colName);
-          done();
-        });
       });
     });
 
