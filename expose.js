@@ -126,21 +126,20 @@ Expose.prototype.send = function(){
  * @api public
  */
 
-Expose.prototype.subscribe = function(promise, fields, fn){
-  if ('function' == typeof fields) {
-    fn = fields;
-    fields = null;
-  }
-
+Expose.prototype.subscribe = function(promise, fn){
   var self = this;
-
   promise.once('complete', function(err, doc){
     if (err) return fn(err);
-    if (!doc._id) return fn(new Error('Document not found'));
-    self.doSubscribe(promise.col, doc._id, fields, function(err, sid){
-      if (err) return fn(err);
-      fn(null, doc, sid);
-    });
+    if (!doc || !doc._id) return fn(new Error('Not found'));
+    self.doSubscribe(
+      promise.col.name,
+      doc._id,
+      promise.opts.fields,
+      function(err, sid){
+        if (err) return fn(err);
+        fn(null, doc, sid);
+      }
+    );
   });
 };
 
