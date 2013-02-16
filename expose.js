@@ -148,12 +148,13 @@ Expose.prototype.subscribe = function(promise, fn){
  *
  * @param {String} collection name
  * @param {ObjectId|String} doc oid
+ * @Param {String} socketid
  * @param {Object} fields
  * @param {Function} callback
  * @api private
  */
 
-Expose.prototype.subscribe = function(col, id, fields, fn){
+Expose.prototype.doSubscribe = function(col, id, fields, fn){
   fields = fields || {};
 
   // store down query
@@ -166,7 +167,14 @@ Expose.prototype.subscribe = function(col, id, fields, fn){
   var uid = ('.' + col + '.' + id + '.' + fields).toLowerCase();
   var sid = md5(this.req.originalSession.id + uid);
 
-  this.redis.setex(sid, 60 * 60 * 24, JSON.stringify(qry), function(err){
+  // client sid
+  qry.s = this.socketid;
+
+  // hash
+  qry.h = sid;
+
+  var data = JSON.stringify(qry);
+  this.redis.publish('MYDB_SUBSCRIBE', data, function(err){
     if (err) return fn(err);
     debug('created subscription "%s" for doc "%s" with fields %j', sid, id, fields);
     fn(null, sid);
@@ -184,7 +192,6 @@ Expose.prototype.sess = function(){
   this.req.originalSession = this.req.session;
   return session;
 };
-
 
 /**
  * Connect middleware.
