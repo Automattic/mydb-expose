@@ -5,7 +5,8 @@
   "private": true,
   "dependencies": {
     "monk": "0.5.0",
-    "redis": "0.8.1",
+    "redis": "0.8.2",
+    "uid2": "*",
     "debug": "*"
   },
   "devDependencies": {
