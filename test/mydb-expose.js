@@ -189,6 +189,45 @@ describe('mydb-expose', function(){
         });
       });
     });
+
+    it('responds with 304', function(done){
+      var app = express();
+      app.use(cookies());
+      app.use(session());
+      app.use(mydb());
+      app.get('/', function(req, res, next){
+        res.send(req.sessionID);
+      });
+
+      request(app)
+      .get('/')
+      .end(function(err, res){
+        if (err) return done(err);
+        var sid = res.text;
+        var cookie = res.headers['set-cookie'][0].split(';')[0];
+
+        request(app)
+        .get('/session?my=1')
+        .set('X-MyDB-SocketId', 'woot')
+        .set('Cookie', cookie)
+        .end(function(err, res){
+          if (err) return done(err);
+          expect(res.body._id).to.be.a('string');
+          var id = res.headers['x-mydb-id'];
+
+          request(app)
+          .get('/session?my=1')
+          .set('X-MyDB-Id', id)
+          .set('X-MyDB-SocketId', 'woot')
+          .set('Cookie', cookie)
+          .end(function(err, res){
+            expect(err).to.be(null);
+            expect(res.status).to.be(304);
+            done();
+          });
+        });
+      });
+    });
   });
 
   describe('req#session', function(){
