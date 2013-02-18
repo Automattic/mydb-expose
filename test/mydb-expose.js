@@ -243,12 +243,18 @@ describe('mydb-expose', function(){
       app.get('/2', function(req, res, next){
         res.send('' + req.session._id);
       });
-      request(app).get('/').expect(200).end(function(err, res1){
+      request(app)
+      .get('/')
+      .expect(200)
+      .end(function(err, res1){
         if (err) return done(err);
+        var cookie = res1.headers['set-cookie'][0].split(';')[0];
+
         request(app)
         .get('/')
-        .set('Cookie', res1.headers['set-cookie'][0].split(';')[0])
-        .expect(200).end(function(err, res2){
+        .set('Cookie', cookie)
+        .expect(200)
+        .end(function(err, res2){
           expect(res1.text).to.be(res2.text);
           done();
         });
@@ -260,6 +266,7 @@ describe('mydb-expose', function(){
       app.use(cookies());
       app.use(session());
       app.use(mydb());
+
       app.get('/', function(req, res, next){
         res.send(200);
       });
@@ -273,16 +280,24 @@ describe('mydb-expose', function(){
         expect(req.session.likes).to.eql(['ferrets']);
         res.send(200);
       });
-      request(app).get('/').expect(200).end(function(err, res){
+
+      request(app)
+      .get('/')
+      .expect(200)
+      .end(function(err, res){
         if (err) return done(err);
+        var cookie = res.headers['set-cookie'][0].split(';')[0];
+
         request(app)
         .get('/2')
-        .set('Cookie', res.headers['set-cookie'][0].split(';')[0])
+        .set('Cookie', cookie)
         .end(function(err){
           if (err) return done(err);
+          var cookie = res.headers['set-cookie'][0].split(';')[0];
+
           request(app)
           .get('/3')
-          .set('Cookie', res.headers['set-cookie'][0].split(';')[0])
+          .set('Cookie', cookie)
           .expect(200, done);
         });
       });
