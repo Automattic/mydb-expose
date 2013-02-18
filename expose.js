@@ -155,28 +155,27 @@ Expose.prototype.subscribe = function(promise, fn){
 
 Expose.prototype.doSubscribe = function(col, id, fields, fn){
   fields = fields || {};
+  var qry = {};
 
-  // store down query
-  var qry = { i: id };
+  // document id
+  qry.i = id;
+
+  // document fields
   if (Object.keys(fields).length) qry.f = fields;
-  qry.c = col;
-
-  // consistent hashing per client for a collection/id/fields combination
-  var fields = JSON.stringify(qry.f);
-  var uid = ('.' + col + '.' + id + '.' + fields).toLowerCase();
-  var sid = md5(this.req.originalSession.id + uid);
 
   // client sid
   qry.s = this.socketid;
 
-  // hash
-  qry.h = sid;
+  // hash of fields/id
+  var ffs = JSON.stringify(order(qry.f)).toLowerCase();
+  qry.h = md5(id + '.' + ffs);
 
+  // publish
   var data = JSON.stringify(qry);
   this.redis.publish('MYDB_SUBSCRIBE', data, function(err){
     if (err) return fn(err);
-    debug('created subscription "%s" for doc "%s" with fields %j', sid, id, fields);
-    fn(null, sid);
+    debug('created subscription "%s" for doc "%s" with fields %j', uid, id, fields);
+    fn(null, uid);
   });
 };
 
@@ -279,4 +278,26 @@ Expose.prototype.fn = function(){
 
 function md5(text){
   return hash('md5').update(text).digest('hex');
+}
+
+/**
+ * Orders an object.
+ *
+ * @api private
+ */
+
+function order(o){
+   var a = [], i;
+
+   for (i in o) {
+     if (o.hasOwnProperty(i)) {
+       a.push([i,o[i]]);
+     }
+   }
+
+   a.sort(function(a,b){
+     return a[0] > b[0] ? 1 : -1;
+   });
+
+   return a;
 }
