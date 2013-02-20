@@ -1,4 +1,23 @@
 
+1.0.0 / 2013-02-19
+==================
+
+  * expose: fix publish callback
+  * expose: improve subscription ids
+  * expose: fix error reporting
+  * package: added `uid2` dep
+  * expose: prevent potential thrown JSON circular structure error
+  * expose: create a new random `SocketId` if one is not present
+  * expose: `doSubscribe` now performs a REDIS publish instead
+  * expose: refactored `subscribe`
+  * expose: added support for 404s for non-mydb requests
+  * expose: handle error from `subscribe` method
+  * epxose: use `MyDB` instead
+  * expose: make check for mydb request based on presence of `X-MyDB-SocketId` header
+  * expose: style
+  * expose: added public subscribe method
+  * expose: added new response mechanism
+
 0.6.7 / 2013-02-05
 ==================
 
