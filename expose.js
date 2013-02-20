@@ -166,16 +166,16 @@ Expose.prototype.doSubscribe = function(col, id, fields, fn){
   // client sid
   qry.s = this.socketid;
 
-  // hash of fields/id
+  // subscription id is a hash of fields/oid
   var ffs = JSON.stringify(order(qry.f)).toLowerCase();
-  qry.h = md5(id + '.' + ffs);
+  var sid = qry.h = md5(id + '.' + ffs);
 
   // publish
   var data = JSON.stringify(qry);
   this.redis.publish('MYDB_SUBSCRIBE', data, function(err){
     if (err) return fn(err);
-    debug('created subscription "%s" for doc "%s" with fields %j', uid, id, fields);
-    fn(null, uid);
+    debug('created subscription "%s" for doc "%s" with fields %j', sid, id, fields);
+    fn(null, sid);
   });
 };
 
