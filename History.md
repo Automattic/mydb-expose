@@ -1,4 +1,10 @@
 
+1.0.1 / 2013-02-20
+==================
+
+  * expose: fix race condition
+  * test: jesus christ redis
+
 1.0.0 / 2013-02-19
 ==================
 
