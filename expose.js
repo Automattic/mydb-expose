@@ -84,7 +84,7 @@ Expose.prototype.send = function(){
       debug('handling res#send promise');
       if (req.get('X-MyDB-SocketId')) {
         debug('mydb - subscribing');
-        self.subscribe(data, function(err, doc, id){
+        self.subscribe(req, data, function(err, doc, id){
           if (err) {
             if ('Not found' == err.message) {
               debug('doc not found - sending 404');
@@ -120,17 +120,19 @@ Expose.prototype.send = function(){
 /**
  * Fetches a document from a promise.
  *
+ * @param {ServerRequest} request
  * @param {Promise} promise
  * @param {Function} callback
  * @api public
  */
 
-Expose.prototype.subscribe = function(promise, fn){
+Expose.prototype.subscribe = function(req, promise, fn){
   var self = this;
   promise.once('complete', function(err, doc){
     if (err) return fn(err);
     if (!doc || !doc._id) return fn(new Error('Not found'));
     self.doSubscribe(
+      req,
       promise.col.name,
       doc._id,
       promise.opts.fields,
@@ -145,6 +147,7 @@ Expose.prototype.subscribe = function(promise, fn){
 /**
  * Subscribes to the given document.
  *
+ * @param {ServerRequest} request
  * @param {String} collection name
  * @param {ObjectId|String} doc oid
  * @Param {String} socketid
@@ -153,7 +156,7 @@ Expose.prototype.subscribe = function(promise, fn){
  * @api private
  */
 
-Expose.prototype.doSubscribe = function(col, id, fields, fn){
+Expose.prototype.doSubscribe = function(req, col, id, fields, fn){
   fields = fields || {};
   var qry = {};
 
@@ -164,7 +167,7 @@ Expose.prototype.doSubscribe = function(col, id, fields, fn){
   if (Object.keys(fields).length) qry.f = fields;
 
   // client sid
-  qry.s = this.socketid;
+  qry.s = req.mydb_socketid;
 
   // subscription id is a hash of fields/oid
   var ffs = JSON.stringify(order(qry.f)).toLowerCase();
@@ -216,9 +219,12 @@ Expose.prototype.middleware = function expose(req, res, next){
   this.next = next;
 
   // generate a socketid if one is not set
-  this.socketid = req.get('X-MyDB-SocketId');
-  if (!this.socketid) {
-    this.socketid = uid(20);
+  req.mydb_socketid = req.get('X-MyDB-SocketId');
+  if (!req.mydb_socketid) {
+    debug('creating new socketid');
+    req.mydb_socketid = uid(20);
+  } else {
+    debug('using socketid provided with request');
   }
 
   // setup overrides
