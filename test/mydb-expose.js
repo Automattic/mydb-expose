@@ -101,13 +101,18 @@ describe('mydb-expose', function(){
         res.send(users.findOne(doc1._id));
       });
       redis.subscribe('MYDB_SUBSCRIBE', function(){
-        redis.on('message', function(channel, data){
-          expect(channel).to.be('MYDB_SUBSCRIBE');
-          data = JSON.parse(data);
-          expect(data.s).to.be('woot');
-          expect(data.c.substr(0, 6)).to.be('users-');
-          expect(data.i).to.be.a('string');
-          expect(data.h).to.be.a('string');
+        redis.on('message', function onmessage(channel, data){
+          try {
+            expect(channel).to.be('MYDB_SUBSCRIBE');
+            data = JSON.parse(data);
+            expect(data.s).to.be('woot');
+            expect(data.i).to.be.a('string');
+            expect(data.h).to.be.a('string');
+          } catch(e){
+            return done(e);
+          }
+
+          redis.removeListener('message', onmessage);
           done();
         });
       });
