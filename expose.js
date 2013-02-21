@@ -187,7 +187,7 @@ Expose.prototype.createSubscription = function(socketid, id, fields, fn){
 
   // subscription id is a hash of fields/oid
   var ffs = JSON.stringify(order(fields || {}));
-  var sid = qry.h = md5(id + '.' + ffs);
+  var sid = qry.h = md5(socketid + '.' + id + '.' + ffs);
 
   // publish
   var data = JSON.stringify(qry);
