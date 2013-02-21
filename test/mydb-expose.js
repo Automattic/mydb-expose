@@ -20,8 +20,8 @@ var request = require('supertest');
  * Test collection.
  */
 
-var colName = 'users-' + Date.now();
-var users = monk.get(colName);
+var users = monk.get('users-' + Date.now());
+var woots = monk.get('woots-' + Date.now());
 var sessions = monk.get('sessions');
 
 /**
@@ -113,7 +113,7 @@ describe('mydb-expose', function(){
           }
 
           redis.removeListener('message', onmessage);
-          done();
+          redis.unsubscribe('MYDB_SUBSCRIBE', done);
         });
       });
       request(app)
@@ -138,6 +138,110 @@ describe('mydb-expose', function(){
         if (err) return done(err);
         expect(res.status).to.be(404);
         done();
+      });
+    });
+  });
+
+  describe('res#subscribe', function(){
+    var doc1 = { _id: woots.id(), tobi: 'test' };
+    woots.insert(doc1);
+
+    it('works with a promise', function(done){
+      var app = express();
+      app.use(cookies());
+      app.use(session());
+      app.use(mydb());
+      app.get('/doc', function(req, res){
+        res.subscribe(woots.findOne(doc1._id), function(err, sid){
+          if (err) return done(err);
+
+          // give time for redis publish
+          setTimeout(function(){
+            res.send(sid);
+          }, 100);
+        });
+      });
+      var sid;
+      redis.subscribe('MYDB_SUBSCRIBE', function(){
+        redis.on('message', function onmessage(channel, data){
+          try {
+            expect(channel).to.be('MYDB_SUBSCRIBE');
+            data = JSON.parse(data);
+            expect(data.s).to.be('woot');
+            expect(data.i).to.be(doc1._id.toString());
+            sid = data.h;
+          } catch(e){
+            return done(e);
+          }
+
+          redis.removeListener('message', onmessage);
+        });
+      });
+      request(app)
+      .get('/doc')
+      .set('X-MyDb-SocketId', 'woot')
+      .end(function(err, res){
+        if (err) return done(err);
+        expect(res.text).to.equal(sid);
+        redis.unsubscribe('MYDB_SUBSCRIBE', done);
+      });
+    });
+
+    it('raises a `Not found` error', function(done){
+      var app = express();
+      app.use(cookies());
+      app.use(session());
+      app.use(mydb());
+      app.get('/doc', function(req, res){
+        res.subscribe(woots.findOne({ a: 'asd' }), function(err, sid){
+          expect(err.message).to.be('Not found');
+          done();
+        });
+      });
+      request(app)
+      .get('/doc')
+      .set('X-MyDb-SocketId', 'woot')
+      .end(function(err, res){});
+    });
+
+    it('works with an id', function(done){
+      var app = express();
+      app.use(cookies());
+      app.use(session());
+      app.use(mydb());
+      app.get('/doc', function(req, res){
+        res.subscribe(doc1._id.toString(), function(err, sid){
+          if (err) return done(err);
+
+          // give time for redis publish
+          setTimeout(function(){
+            res.send(sid);
+          }, 100);
+        });
+      });
+      var sid;
+      redis.subscribe('MYDB_SUBSCRIBE', function(){
+        redis.on('message', function onmessage(channel, data){
+          try {
+            expect(channel).to.be('MYDB_SUBSCRIBE');
+            data = JSON.parse(data);
+            expect(data.s).to.be('woot');
+            expect(data.i).to.be(doc1._id.toString());
+            sid = data.h;
+          } catch(e){
+            return done(e);
+          }
+
+          redis.removeListener('message', onmessage);
+        });
+      });
+      request(app)
+      .get('/doc')
+      .set('X-MyDb-SocketId', 'woot')
+      .end(function(err, res){
+        if (err) return done(err);
+        expect(res.text).to.equal(sid);
+        redis.unsubscribe('MYDB_SUBSCRIBE', done);
       });
     });
   });
