@@ -324,3 +324,29 @@ function order(o){
 
    return a;
 }
+
+/**
+ * Fields argument helper.
+ *
+ * @param {String|Array|Object} fields
+ * @api private
+ */
+
+function toFields(obj) {
+  if (!Array.isArray(obj) && 'object' == typeof obj) {
+    return obj;
+  }
+
+  var fields = {};
+  obj = 'string' == typeof obj ? obj.split(' ') : (obj || []);
+
+  for (var i = 0, l = obj.length; i < l; i++) {
+    if ('-' == obj[i][0]) {
+      fields[obj[i].substr(1)] = 0;
+    } else {
+      fields[obj[i]] = 1;
+    }
+  }
+
+  return fields;
+}
