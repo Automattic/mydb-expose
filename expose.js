@@ -244,6 +244,7 @@ Expose.prototype.middleware = function expose(req, res, next){
   }
 
   // setup overrides
+  res.subscribe = req.subscribe = this.subscribe();
   res.end = this.end();
   res.send = this.send();
 
