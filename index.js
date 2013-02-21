@@ -38,9 +38,9 @@ function mydb(opts){
 
   // session exposed fields
   // XXX: move into `mydb-session`
-  var expose = opts.sessionExpose || '-sid';
+  var sessionExpose = opts.sessionExpose || '-sid';
 
   // create middleware
-  var expose = new Expose(opts.redis, opts.mongo, expose);
+  var expose = new Expose(opts.redis, opts.mongo, sessionExpose);
   return expose.fn();
 }
