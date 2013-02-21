@@ -163,16 +163,15 @@ Expose.prototype.subscribe = function(){
 /**
  * Subscribes to the given document.
  *
- * @param {ServerRequest} request
- * @param {String} collection name
+ * @param {String} socketid
  * @param {ObjectId|String} doc oid
  * @Param {String} socketid
- * @param {Object} fields
+ * @param {Object|String|Array} fields
  * @param {Function} callback
  * @api private
  */
 
-Expose.prototype.doSubscribe = function(req, col, id, fields, fn){
+Expose.prototype.createSubscription = function(socketid, id, fields, fn){
   fields = fields || {};
   var qry = {};
 
@@ -180,13 +179,14 @@ Expose.prototype.doSubscribe = function(req, col, id, fields, fn){
   qry.i = id;
 
   // document fields
+  fields = toFields(fields);
   if (Object.keys(fields).length) qry.f = fields;
 
   // client sid
-  qry.s = req.mydb_socketid;
+  qry.s = socketid;
 
   // subscription id is a hash of fields/oid
-  var ffs = JSON.stringify(order(qry.f)).toLowerCase();
+  var ffs = JSON.stringify(order(fields || {}));
   var sid = qry.h = md5(id + '.' + ffs);
 
   // publish
