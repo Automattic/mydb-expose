@@ -73,6 +73,7 @@ Expose.prototype.end = function(){
 Expose.prototype.send = function(){
   var req = this.req;
   var res = this.res;
+  var subscribe = req.subscribe;
   var send = res.send;
   var next = req.next;
   var self = this;
@@ -84,24 +85,20 @@ Expose.prototype.send = function(){
       debug('handling res#send promise');
       if (req.get('X-MyDB-SocketId')) {
         debug('mydb - subscribing');
-        self.subscribe(req, data, function(err, doc, id){
-          if (err) {
-            if ('Not found' == err.message) {
-              debug('doc not found - sending 404');
-              return res.send(404);
+        data.on('complete', function(err, doc){
+          if (err) return next(err);
+          if (!doc || !doc._id) return res.send(404);
+          subscribe(doc._id, data.opts.fields, function(err, id){
+            if (err) return next(err);
+            if (id == req.get('X-MyDB-Id')) {
+              debug('subscription id matches one provided by client');
+              res.send(304);
             } else {
-              return next(err);
+              debug('sending new subscription with document');
+              res.set('X-MyDB-Id', id);
+              res.send(doc);
             }
-          }
-
-          if (id == req.get('X-MyDB-Id')) {
-            debug('subscription id matches one provided by client');
-            res.send(304);
-          } else {
-            debug('sending new subscription with document');
-            res.set('X-MyDB-Id', id);
-            res.send(doc);
-          }
+          });
         });
       } else {
         debug('no mydb - not subscribing');
