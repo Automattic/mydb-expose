@@ -117,28 +117,47 @@ Expose.prototype.send = function(){
 /**
  * Fetches a document from a promise.
  *
- * @param {ServerRequest} request
- * @param {Promise} promise
- * @param {Function} callback
- * @api public
+ * @return {Function} send
+ * @api private
  */
 
-Expose.prototype.subscribe = function(req, promise, fn){
+Expose.prototype.subscribe = function(){
+  var req = this.req;
+  var res = this.res;
+  var send = res.send;
+  var next = req.next;
   var self = this;
-  promise.once('complete', function(err, doc){
-    if (err) return fn(err);
-    if (!doc || !doc._id) return fn(new Error('Not found'));
-    self.doSubscribe(
-      req,
-      promise.col.name,
-      doc._id,
-      promise.opts.fields,
-      function(err, sid){
+
+  /**
+   * Subscribe.
+   *
+   * @param {String|ObjectId|Promise} data
+   * @param {String|Array|Object} fields (optional)
+   * @param {Function} callback (optional)
+   * @api public
+   */
+
+  return function subscribe(data, fields, fn){
+    if ('function' == typeof fields) {
+      fn = fields;
+      fields = null;
+    }
+
+    if (data.fulfill) {
+      data.on('complete', function(err, doc){
         if (err) return fn(err);
-        fn(null, doc, sid);
-      }
-    );
-  });
+        if (!doc) return fn(new Error('Not found'));
+        to(doc._id, fields || data.fields);
+      });
+    } else {
+      to(data);
+    }
+
+    function to(id){
+      id = id.toString();
+      self.createSubscription(req.mydb_socketid, id, fields, fn);
+    }
+  };
 };
 
 /**
