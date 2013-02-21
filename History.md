@@ -1,4 +1,15 @@
 
+1.1.0 / 2013-02-21
+==================
+
+  * test: added `res#subscribe` tests
+  * expose: added `toFields` helper
+  * expose: expose `res.subscribe` and `req.subscribe`
+  * expose: rename `doSubscripe` to `createSubscription`
+  * expose: implemented `res.subscribe`
+  * send: use `res.subscribe`
+  * index: fix variable shadowing
+
 1.0.1 / 2013-02-20
 ==================
 
