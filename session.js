@@ -73,9 +73,13 @@ Session.prototype.reload = function(fn){
   fn = fn || noop;
   var self = this;
   var qry = { sid: this.$req.originalSession.id };
+  var set = {
+    sid: this.$req.originalSession.id,
+    user_agent: this.$req.headers['user-agent']
+  };
   var opts = { upsert: true };
   debug('reload %s', qry.sid);
-  this.$col.findAndModify(qry, { $set: qry }, opts, function(err, obj){
+  this.$col.findAndModify(qry, { $set: set }, opts, function(err, obj){
     if (err) return fn(err);
     var keys = self.$keys;
     for (var i = 0; i < keys.length; i++) delete self[keys[i]];
