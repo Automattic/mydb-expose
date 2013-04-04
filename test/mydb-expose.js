@@ -273,6 +273,18 @@ describe('mydb-expose', function(){
       });
     });
 
+    it('ignores non-GET', function(done){
+      var app = express();
+      app.use(cookies());
+      app.use(session());
+      app.use(mydb());
+      request(app).post('/session').end(function(err, res){
+        if (err) return done(err);
+        expect(res.status).to.be(404);
+        done();
+      });
+    });
+
     it('responds with a mydb id', function(done){
       var app = express();
       app.use(cookies());
