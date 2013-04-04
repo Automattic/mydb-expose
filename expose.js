@@ -272,7 +272,7 @@ Expose.prototype.middleware = function expose(req, res, next){
  */
 
 Expose.prototype.routes = function(next){
-  if (/^\/session\/?(\?.*)?$/.test(this.req.url)) {
+  if (/^\/session\/?(\?.*)?$/.test(this.req.url) && 'GET' == this.req.method) {
     var col = this.sessions;
     var sid = this.req.session._id;
     var pro = col.findOne(sid, this.sessionExpose);
