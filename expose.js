@@ -147,7 +147,7 @@ Expose.prototype.subscribe = function(){
       data.on('complete', function(err, doc){
         if (err) return fn(err);
         if (!doc) return fn(new Error('Not found'));
-        to(doc._id, fields || data.fields);
+        to(doc._id, fields || data.opts.fields);
       });
     } else {
       to(data);
