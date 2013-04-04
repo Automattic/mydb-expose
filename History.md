@@ -1,4 +1,10 @@
 
+1.1.4 / 2013-04-04
+==================
+
+  * expose: fix fields retrieval from promise
+  * test: for non-GET
+
 1.1.3 / 2013-04-04
 ==================
 
