@@ -245,7 +245,8 @@ Expose.prototype.middleware = function expose(req, res, next){
   req.mydb_socketid = req.get('X-MyDB-SocketId');
   if (!req.mydb_socketid) {
     debug('creating new socketid');
-    uid(12, function(id) {
+    uid(12, function(err, id) {
+      if (err) return next(err);
       req.mydb_socketid = id;
       done();
     });
