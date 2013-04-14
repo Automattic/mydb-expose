@@ -226,6 +226,8 @@ Expose.prototype.middleware = function expose(req, res, next){
     return next();
   }
 
+  var self = this;
+
   // setup shortcut to instance
   req.mydb = res.mydb = this;
 
@@ -234,33 +236,38 @@ Expose.prototype.middleware = function expose(req, res, next){
   this.res = res;
   this.next = next;
 
-  // generate a socketid if one is not set
-  req.mydb_socketid = req.get('X-MyDB-SocketId');
-  if (!req.mydb_socketid) {
-    debug('creating new socketid');
-    req.mydb_socketid = uid(20);
-  } else {
-    debug('using socketid provided with request');
-  }
-
   // setup overrides
   res.subscribe = req.subscribe = this.subscribe();
   res.end = this.end();
   res.send = this.send();
 
-  if (req.session) {
-    // session object
-    req.session = this.sess();
-
-    // populates the session and moves on
-    var self = this;
-    req.session.reload(function(err){
-      if (err) return next(err);
-      self.routes(next);
+  // generate a socketid if one is not set
+  req.mydb_socketid = req.get('X-MyDB-SocketId');
+  if (!req.mydb_socketid) {
+    debug('creating new socketid');
+    uid(12, function(id) {
+      req.mydb_socketid = id;
+      done();
     });
   } else {
-    debug('no session - skipping');
-    next();
+    debug('using socketid provided with request');
+    done();
+  }
+
+  function done(){
+    if (req.session) {
+      // session object
+      req.session = self.sess();
+
+      // populates the session and moves on
+      req.session.reload(function(err){
+        if (err) return next(err);
+        self.routes(next);
+      });
+    } else {
+      debug('no session - skipping');
+      next();
+    }
   }
 };
 
