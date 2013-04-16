@@ -20,16 +20,14 @@ module.exports = Expose;
  * Expose constructor.
  *
  * @param {RedisClient} redis client
- * @param {Monk.Manager} mongodb client
+ * @param {Monk.Collection} sessions collection
  * @param {String|Array|Object} session fields to expose
  * @api public
  */
 
-function Expose(redis, mongo, expose){
+function Expose(redis, sessions, expose){
   this.redis = redis;
-  this.mongo = mongo;
-  this.sessions = mongo.get('sessions');
-  this.sessions.index('sid');
+  this.sessions = sessions;
   this.sessionExpose = expose;
 }
 
