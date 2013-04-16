@@ -1,4 +1,9 @@
 
+1.1.7 / 2013-04-15
+==================
+
+  * expose: fix nasty state bug thanks to @visionmedia
+
 1.1.6 / 2013-04-14
 ==================
 
