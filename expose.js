@@ -47,7 +47,7 @@ Expose.prototype.end = function(){
   return function(data, encoding){
     res.end = end;
 
-    if (req.session.$dirty()) {
+    if (req.session && req.session.$dirty()) {
       req.session.save(done);
     } else {
       done();
@@ -55,7 +55,10 @@ Expose.prototype.end = function(){
 
     function done(err){
       if (err) return next(err);
-      req.session = req.originalSession;
+      if (req.originalSession) {
+        debug('restoring original session');
+        req.session = req.originalSession;
+      }
       res.end(data, encoding);
     }
   };
