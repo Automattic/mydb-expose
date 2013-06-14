@@ -3,11 +3,12 @@
  * Module dependencies.
  */
 
-var Session = require('./session');
 var qs = require('querystring');
 var url = require('url');
-var hash = require('crypto').createHash;
 var uid = require('uid2');
+var crypto = require('crypto');
+var request = require('superagent');
+var Session = require('./session');
 var debug = require('debug')('mydb-expose');
 
 /**
@@ -25,8 +26,8 @@ module.exports = Expose;
  * @api public
  */
 
-function Expose(redis, sessions, expose){
-  this.redis = redis;
+function Expose(secret, sessions, expose){
+  this.secret = secret;
   this.sessions = sessions;
   this.sessionExpose = expose;
 }
