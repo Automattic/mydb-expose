@@ -3,9 +3,8 @@
  * Module dependencies.
  */
 
-var monk = require('monk')
-  , redis = require('redis').createClient
-  , Expose = require('./expose');
+var monk = require('monk');
+var Expose = require('./expose');
 
 /**
  * Module exports.
