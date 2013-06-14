@@ -37,9 +37,23 @@ function mydb(opts){
   // secret
   var secret = opts.secret || 'youareagoodmydbcracker';
 
+  // url
+  var url = opts.url;
+
+  if (!url) {
+    throw new Error('Missing `url` (mydb server) option.');
+  }
+
+  if ('string' == url) {
+    var _url = url;
+    url = function(){
+      return _url;
+    };
+  }
+
   // create middleware
   return function(req, res, next){
-    var expose = new Expose(secret, sessions, sessionExpose);
+    var expose = new Expose(url, secret, sessions, sessionExpose);
     expose.middleware(req, res, next);
   };
 }
