@@ -193,9 +193,17 @@ Expose.prototype.createSubscription = function(socketid, id, fields, fn){
 
   // publish
   var data = JSON.stringify(qry);
-  this.redis.publish('MYDB_SUBSCRIBE', data, function(err){
-    if (err) return fn(err);
-    debug('created subscription "%s" for doc "%s" with fields %j', sid, id, fields);
+  request
+  .post(this.url() + '/mydb_subscribe')
+  .set('Content-Type', 'application/json')
+  .set('X-MyDB-Signature', sign(data, this.secret))
+  .send(data)
+  .end(function(res){
+    if (res.error) {
+      debug('subscription error %j', res.error);
+      return fn(res.error);
+    }
+
     fn(null, sid);
   });
 };
