@@ -180,23 +180,23 @@ Expose.prototype.createSubscription = function(socketid, id, fields, fn){
   var qry = {};
 
   // document id
-  qry.i = id;
+  qry.document_id = id;
 
   // document fields
   fields = toFields(fields);
-  if (Object.keys(fields).length) qry.f = fields;
+  if (Object.keys(fields).length) qry.fields = fields;
 
   // client sid
-  qry.s = socketid;
+  qry.socket_id = socketid;
 
   // subscription id is a hash of fields/oid
   var ffs = JSON.stringify(order(fields || {}));
-  var sid = qry.h = md5(socketid + '.' + id + '.' + ffs);
+  var sid = qry.subscription_id = md5(socketid + '.' + id + '.' + ffs);
 
   // publish
   var data = JSON.stringify(qry);
   request
-  .post(this.url.call(this) + '/mydb_subscribe')
+  .post(this.url.call(this) + '/mydb/subscribe')
   .set('Content-Type', 'application/json')
   .set('X-MyDB-Signature', sign(data, this.secret))
   .send(data)
