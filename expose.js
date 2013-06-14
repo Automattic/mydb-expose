@@ -21,7 +21,7 @@ module.exports = Expose;
  * Expose constructor.
  *
  * @param {Function} url getter
- * @param {RedisClient} redis client
+ * @param {String} mydb secret
  * @param {Monk.Collection} sessions collection
  * @param {String|Array|Object} session fields to expose
  * @api public
