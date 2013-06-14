@@ -34,9 +34,12 @@ function mydb(opts){
   // XXX: move into `mydb-session`
   var sessionExpose = opts.sessionExpose || '-sid';
 
+  // secret
+  var secret = opts.secret || 'youareagoodmydbcracker';
+
   // create middleware
   return function(req, res, next){
-    var expose = new Expose(opts.redis, sessions, sessionExpose);
+    var expose = new Expose(secret, sessions, sessionExpose);
     expose.middleware(req, res, next);
   };
 }
