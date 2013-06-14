@@ -209,6 +209,14 @@ Expose.prototype.createSubscription = function(socketid, id, fields, fn){
 };
 
 /**
+ * Gets the mydb server URL.
+ */
+
+Expose.prototype.url = function(){
+  throw new Error('Please override the `req.mydb.url()` getter');
+};
+
+/**
  * Returns the overriden `session`.
  *
  * @return {MyDBSession} session object
