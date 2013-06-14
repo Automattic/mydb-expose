@@ -320,7 +320,9 @@ Expose.prototype.fn = function(){
  */
 
 function md5(text){
-  return hash('md5').update(text).digest('hex');
+  return crypto.createHash('md5')
+  .update(text)
+  .digest('hex');
 }
 
 /**
@@ -369,4 +371,19 @@ function toFields(obj) {
   }
 
   return fields;
+}
+
+/**
+ * HMac signing helper.
+ *
+ * @param {String} data
+ * @param {String} secret
+ * @api private
+ */
+
+function sign(data, secret){
+  return crypto
+  .createHmac('sha1', secret)
+  .update(data)
+  .digest('hex');
 }
