@@ -20,13 +20,15 @@ module.exports = Expose;
 /**
  * Expose constructor.
  *
+ * @param {Function} url getter
  * @param {RedisClient} redis client
  * @param {Monk.Collection} sessions collection
  * @param {String|Array|Object} session fields to expose
  * @api public
  */
 
-function Expose(secret, sessions, expose){
+function Expose(url, secret, sessions, expose){
+  this.url = url;
   this.secret = secret;
   this.sessions = sessions;
   this.sessionExpose = expose;
@@ -194,7 +196,7 @@ Expose.prototype.createSubscription = function(socketid, id, fields, fn){
   // publish
   var data = JSON.stringify(qry);
   request
-  .post(this.url() + '/mydb_subscribe')
+  .post(this.url.call(this) + '/mydb_subscribe')
   .set('Content-Type', 'application/json')
   .set('X-MyDB-Signature', sign(data, this.secret))
   .send(data)
@@ -206,14 +208,6 @@ Expose.prototype.createSubscription = function(socketid, id, fields, fn){
 
     fn(null, sid);
   });
-};
-
-/**
- * Gets the mydb server URL.
- */
-
-Expose.prototype.url = function(){
-  throw new Error('Please override the `req.mydb.url()` getter');
 };
 
 /**
