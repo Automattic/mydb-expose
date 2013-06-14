@@ -22,15 +22,6 @@ module.exports = mydb;
 function mydb(opts){
   opts = opts || {};
 
-  // redis
-  if ('object' != typeof opts.redis) {
-    opts.redis = opts.redis || 'localhost:6379';
-    var pieces = opts.redis.split(':');
-    var port = pieces.pop();
-    var host = pieces.pop();
-    opts.redis = redis(port, host);
-  }
-
   // mongodb
   if ('object' != typeof opts.mongo) {
     opts.mongo = monk(opts.mongo || 'localhost:27017/mydb');
