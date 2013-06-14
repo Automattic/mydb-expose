@@ -200,7 +200,12 @@ Expose.prototype.createSubscription = function(socketid, id, fields, fn){
   .set('Content-Type', 'application/json')
   .set('X-MyDB-Signature', sign(data, this.secret))
   .send(data)
-  .end(function(res){
+  .end(function(err, res){
+    if (err) {
+      debug('socket error');
+      return fn(err);
+    }
+
     if (res.error) {
       debug('subscription error %j', res.error);
       return fn(res.error);
