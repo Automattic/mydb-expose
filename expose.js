@@ -195,6 +195,7 @@ Expose.prototype.createSubscription = function(socketid, id, fields, fn){
 
   // publish
   var data = JSON.stringify(qry);
+  var start = Date.now();
   request
   .post(this.url.call(this) + '/mydb/subscribe')
   .set('Content-Type', 'application/json')
@@ -211,6 +212,7 @@ Expose.prototype.createSubscription = function(socketid, id, fields, fn){
       return fn(res.error);
     }
 
+    debug('mydb subscribe took %d', Date.now() - start);
     fn(null, sid);
   });
 };
