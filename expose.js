@@ -204,9 +204,10 @@ Expose.prototype.createSubscription = function(socketid, id, fields, fn){
   // publish
   var data = JSON.stringify(qry);
   var start = Date.now();
-  request
-  .post(this.url.call(this) + '/mydb/subscribe')
-  .agent(agent)
+  var req = request
+  .post(this.url.call(this) + '/mydb/subscribe');
+  req.agent(agent);
+  req
   .set('Content-Type', 'application/json')
   .set('X-MyDB-Signature', sign(data, this.secret))
   .send(data)
