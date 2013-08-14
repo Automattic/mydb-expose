@@ -6,6 +6,7 @@
 var qs = require('querystring');
 var url = require('url');
 var uid = require('uid2');
+var http = require('http');
 var crypto = require('crypto');
 var request = require('superagent');
 var Session = require('./session');
@@ -16,6 +17,13 @@ var debug = require('debug')('mydb-expose');
  */
 
 module.exports = Expose;
+
+/**
+ * Tweak max sockets in pool.
+ */
+
+var agent = new http.Agent;
+agent.maxSockets = 50;
 
 /**
  * Expose constructor.
@@ -198,6 +206,7 @@ Expose.prototype.createSubscription = function(socketid, id, fields, fn){
   var start = Date.now();
   request
   .post(this.url.call(this) + '/mydb/subscribe')
+  .agent(agent)
   .set('Content-Type', 'application/json')
   .set('X-MyDB-Signature', sign(data, this.secret))
   .send(data)
