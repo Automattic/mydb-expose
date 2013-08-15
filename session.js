@@ -75,7 +75,9 @@ Session.prototype.reload = function(fn){
   var qry = { sid: this.$req.originalSession.id };
   var set = {
     sid: this.$req.originalSession.id,
-    user_agent: this.$req.headers['user-agent']
+    active_at: new Date,
+    user_agent: this.$req.headers['user-agent'],
+    state: 'online'
   };
   var opts = { upsert: true };
   debug('reload %s', qry.sid);
