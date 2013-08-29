@@ -34,6 +34,7 @@ function Session(col, req){
 
   // copy properties from the original session
   for (var i in req.session){
+    if ('_csrf' == i) continue;
     if (!this[i]) this[i] = req.session[i];
   }
 }
