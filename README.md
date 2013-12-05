@@ -1,4 +1,3 @@
-
 # mydb-expose
 
   Connect middleware to expose documents through MyDB.
@@ -14,7 +13,7 @@ var db = require('monk')():
 
 // middleware
 app.use(express.cookieParser());
-app.use(mydb({ redisHost: '127.0.0.1', redisPort: 6679 }));
+app.use(mydb({ mongo: '127.0.0.1:27017', url: '127.0.0.1:3000' }));
 
 // example session route
 app.post('/login', function(req, res){
@@ -33,7 +32,9 @@ app.get('/some/doc', function(req, res){
 ### Middleware
 
   Options:
-
+  
+  - `url`
+    - a string like `cloudup.mydb.io`
   - `redis`
     - a redis client instance or
     - a string like `localhost:6379`
