@@ -43,7 +43,7 @@ function mydb(opts){
     throw new Error('Missing `url` (mydb server) option.');
   }
 
-  if ('string' == url) {
+  if (typeof url == 'string') {
     var _url = url;
     url = function(){
       return _url;
