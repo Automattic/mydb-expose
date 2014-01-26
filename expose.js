@@ -197,25 +197,42 @@ Expose.prototype.createSubscription = function(socketid, id, fields, fn){
   // publish
   var data = JSON.stringify(qry);
   var start = Date.now();
-  var req = request
-  .post(this.url.call(this) + '/mydb/subscribe')
-  .set('Content-Type', 'application/json')
-  .set('X-MyDB-Signature', sign(data, this.secret))
-  .send(data)
-  .end(function(err, res){
-    if (err) {
-      debug('socket error');
-      return fn(err);
-    }
 
-    if (res.error) {
-      debug('subscription error %j', res.error);
-      return fn(res.error);
-    }
+  var url = this.url;
 
-    debug('mydb subscribe took %d', Date.now() - start);
-    fn(null, sid);
-  });
+  // allow for a function getter
+  if ('function' == typeof url) {
+    url = url.call(this);
+  }
+
+  if ('object' == typeof url) {
+    // using mydb object directly (in-proc)
+    url.subscribe(qry, function(err){
+      if (err) return fn(err);
+      fn(null, sid);
+    });
+  } else {
+    // post to mydb API
+    var req = request
+    .post(url + '/mydb/subscribe')
+    .set('Content-Type', 'application/json')
+    .set('X-MyDB-Signature', sign(data, this.secret))
+    .send(data)
+    .end(function(err, res){
+      if (err) {
+        debug('socket error');
+        return fn(err);
+      }
+
+      if (res.error) {
+        debug('subscription error %j', res.error);
+        return fn(res.error);
+      }
+
+      debug('mydb subscribe took %d', Date.now() - start);
+      fn(null, sid);
+    });
+  }
 };
 
 /**
