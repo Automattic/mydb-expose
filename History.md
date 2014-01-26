@@ -1,4 +1,10 @@
 
+2.1.0 / 2014-01-26
+==================
+
+ * docs
+ * expose: add support for passing a mydb server ref as `url`
+
 2.0.7 / 2013-08-29
 ==================
 
