@@ -34,7 +34,8 @@ app.get('/some/doc', function(req, res){
   Options:
   
   - `url`
-    - a string like `cloudup.mydb.io`
+    - a string like `cloudup.mydb.io` or a reference to the `mydb`
+      server object in case it's in the same process
   - `redis`
     - a redis client instance or
     - a string like `localhost:6379`
