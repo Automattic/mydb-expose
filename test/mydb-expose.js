@@ -10,8 +10,9 @@ var mongo = 'localhost/mydb-expose-test' || process.env.MONGO_URI;
  */
 
 var my = require('..');
+var mydb = require('mydb');
+var http = require('http').Server;
 var monk = require('monk')(mongo);
-var redis = require('redis').createClient();
 var express = require('express');
 var expect = require('expect.js');
 var request = require('supertest');
@@ -30,8 +31,8 @@ var sessions = monk.get('sessions');
  * @api private
  */
 
-function mydb(){
-  return my({ mongo: mongo });
+function expose(){
+  return my({ mongo: mongo, url: mydb(http()) });
 }
 
 /**
@@ -40,7 +41,7 @@ function mydb(){
 
 function cookies(){
   return express.cookieParser();
-};
+}
 
 /**
  * Returns the session middleware.
@@ -68,7 +69,7 @@ describe('mydb-expose', function(){
       var app = express();
       app.use(cookies());
       app.use(session());
-      app.use(mydb());
+      app.use(expose());
       app.get('/doc', function(req, res){
         res.send(users.findOne(doc1._id));
       });
@@ -82,7 +83,7 @@ describe('mydb-expose', function(){
       var app = express();
       app.use(cookies());
       app.use(session());
-      app.use(mydb());
+      app.use(expose());
       app.get('/document', function(req, res){
         res.send(users.find({}));
       });
@@ -92,43 +93,11 @@ describe('mydb-expose', function(){
       ], done);
     });
 
-    it('Collection#findOne + mydb', function(done){
-      var app = express();
-      app.use(cookies());
-      app.use(session());
-      app.use(mydb());
-      app.get('/doc', function(req, res){
-        res.send(users.findOne(doc1._id));
-      });
-      redis.subscribe('MYDB_SUBSCRIBE', function(){
-        redis.on('message', function onmessage(channel, data){
-          try {
-            expect(channel).to.be('MYDB_SUBSCRIBE');
-            data = JSON.parse(data);
-            expect(data.s).to.be('woot');
-            expect(data.i).to.be.a('string');
-            expect(data.h).to.be.a('string');
-          } catch(e){
-            return done(e);
-          }
-
-          redis.removeListener('message', onmessage);
-          redis.unsubscribe('MYDB_SUBSCRIBE', done);
-        });
-      });
-      request(app)
-      .get('/doc')
-      .set('X-MyDb-SocketId', 'woot')
-      .end(function(err, res){
-        if (err) return done(err);
-      });
-    });
-
     it('Collection#find + 404', function(done){
       var app = express();
       app.use(cookies());
       app.use(session());
-      app.use(mydb());
+      app.use(expose());
       app.get('/missing-doc', function(req, res){
         res.send(users.findOne({ asd: 'testing testing 404' }));
       });
@@ -142,116 +111,12 @@ describe('mydb-expose', function(){
     });
   });
 
-  describe('res#subscribe', function(){
-    var doc1 = { _id: woots.id(), tobi: 'test' };
-    woots.insert(doc1);
-
-    it('works with a promise', function(done){
-      var app = express();
-      app.use(cookies());
-      app.use(session());
-      app.use(mydb());
-      app.get('/doc', function(req, res){
-        res.subscribe(woots.findOne(doc1._id), function(err, sid){
-          if (err) return done(err);
-
-          // give time for redis publish
-          setTimeout(function(){
-            res.send(sid);
-          }, 100);
-        });
-      });
-      var sid;
-      redis.subscribe('MYDB_SUBSCRIBE', function(){
-        redis.on('message', function onmessage(channel, data){
-          try {
-            expect(channel).to.be('MYDB_SUBSCRIBE');
-            data = JSON.parse(data);
-            expect(data.s).to.be('woot');
-            expect(data.i).to.be(doc1._id.toString());
-            sid = data.h;
-          } catch(e){
-            return done(e);
-          }
-
-          redis.removeListener('message', onmessage);
-        });
-      });
-      request(app)
-      .get('/doc')
-      .set('X-MyDb-SocketId', 'woot')
-      .end(function(err, res){
-        if (err) return done(err);
-        expect(res.text).to.equal(sid);
-        redis.unsubscribe('MYDB_SUBSCRIBE', done);
-      });
-    });
-
-    it('raises a `Not found` error', function(done){
-      var app = express();
-      app.use(cookies());
-      app.use(session());
-      app.use(mydb());
-      app.get('/doc', function(req, res){
-        res.subscribe(woots.findOne({ a: 'asd' }), function(err, sid){
-          expect(err.message).to.be('Not found');
-          done();
-        });
-      });
-      request(app)
-      .get('/doc')
-      .set('X-MyDb-SocketId', 'woot')
-      .end(function(err, res){});
-    });
-
-    it('works with an id', function(done){
-      var app = express();
-      app.use(cookies());
-      app.use(session());
-      app.use(mydb());
-      app.get('/doc', function(req, res){
-        res.subscribe(doc1._id.toString(), function(err, sid){
-          if (err) return done(err);
-
-          // give time for redis publish
-          setTimeout(function(){
-            res.send(sid);
-          }, 100);
-        });
-      });
-      var sid;
-      redis.subscribe('MYDB_SUBSCRIBE', function(){
-        redis.on('message', function onmessage(channel, data){
-          try {
-            expect(channel).to.be('MYDB_SUBSCRIBE');
-            data = JSON.parse(data);
-            expect(data.s).to.be('woot');
-            expect(data.i).to.be(doc1._id.toString());
-            sid = data.h;
-          } catch(e){
-            return done(e);
-          }
-
-          redis.removeListener('message', onmessage);
-        });
-      });
-      request(app)
-      .get('/doc')
-      .set('X-MyDb-SocketId', 'woot')
-      .end(function(err, res){
-        if (err) return done(err);
-        expect(res.text).to.equal(sid);
-        redis.unsubscribe('MYDB_SUBSCRIBE', done);
-      });
-    });
-  });
-
   describe('/session', function(){
     it('responds json', function(done){
       var app = express();
       app.use(cookies());
       app.use(session());
-      app.use(mydb());
+      app.use(expose());
       request(app).get('/session').end(function(err, res){
         if (err) return done(err);
 
@@ -277,7 +142,7 @@ describe('mydb-expose', function(){
       var app = express();
       app.use(cookies());
       app.use(session());
-      app.use(mydb());
+      app.use(expose());
       request(app).post('/session').end(function(err, res){
         if (err) return done(err);
         expect(res.status).to.be(404);
@@ -289,7 +154,7 @@ describe('mydb-expose', function(){
       var app = express();
       app.use(cookies());
       app.use(session());
-      app.use(mydb());
+      app.use(expose());
       app.get('/', function(req, res, next){
         res.send(req.sessionID);
       });
@@ -315,7 +180,7 @@ describe('mydb-expose', function(){
       var app = express();
       app.use(cookies());
       app.use(session());
-      app.use(mydb());
+      app.use(expose());
       app.get('/', function(req, res, next){
         res.send(req.sessionID);
       });
@@ -356,7 +221,7 @@ describe('mydb-expose', function(){
       var app = express();
       app.use(cookies());
       app.use(session());
-      app.use(mydb());
+      app.use(expose());
       app.get('/', function(req, res, next){
         expect(req.session.sid).to.eql(req.sessionID);
         res.send('' + req.session._id);
@@ -386,7 +251,7 @@ describe('mydb-expose', function(){
       var app = express();
       app.use(cookies());
       app.use(session());
-      app.use(mydb());
+      app.use(expose());
 
       app.get('/', function(req, res, next){
         res.send(200);
