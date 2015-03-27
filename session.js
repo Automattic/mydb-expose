@@ -120,6 +120,11 @@ Session.prototype.regenerate = function(fn){
   debug('regenerating');
   this.$req.originalSession.regenerate(function(err){
     if (err) return fn(err);
+    if (self !== self.$req.session) {
+      // req.session has been replaced, restore it
+      self.$req.originalSession = self.$req.session;
+      self.$req.session = self;
+    }
     self.reload(fn);
   });
   return this;
