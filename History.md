@@ -1,4 +1,9 @@
 
+2.1.1 / 2015-03-28
+==================
+
+ * session: handle case where session field is replaced
+
 2.1.0 / 2014-01-26
 ==================
 

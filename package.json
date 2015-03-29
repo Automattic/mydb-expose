@@ -1,6 +1,6 @@
 {
   "name": "mydb-expose",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "mydb express middleware",
   "dependencies": {
     "monk": "0.5.0",
