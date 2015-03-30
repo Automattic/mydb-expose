@@ -125,6 +125,8 @@ Session.prototype.regenerate = function(fn){
       self.$req.originalSession = self.$req.session;
       self.$req.session = self;
     }
+    // make sure the reference to the new cookie object is copied over
+    self.cookie = self.$req.originalSession.cookie;
     self.reload(fn);
   });
   return this;
