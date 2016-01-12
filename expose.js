@@ -1,16 +1,17 @@
+"use strict";
 
 /**
  * Module dependencies.
  */
 
-var qs = require('querystring');
-var url = require('url');
-var uid = require('uid2');
-var http = require('http');
-var crypto = require('crypto');
-var request = require('superagent');
-var Session = require('./session');
-var debug = require('debug')('mydb-expose');
+const qs = require('querystring');
+const url = require('url');
+const uid = require('uid2');
+const http = require('http');
+const crypto = require('crypto');
+const request = require('superagent');
+const Session = require('./session');
+const debug = require('debug')('mydb-expose');
 
 /**
  * Module exports.
@@ -23,7 +24,7 @@ module.exports = Expose;
  *
  * @param {Function} url getter
  * @param {String} mydb secret
- * @param {Monk.Collection} sessions collection
+ * @param {mongodb.Collection} sessions collection
  * @param {String|Array|Object} session fields to expose
  * @api public
  */
@@ -83,17 +84,20 @@ Expose.prototype.send = function(){
   var next = req.next;
   var self = this;
 
-  return function(data){
+  return function (data) {
     res.send = send;
+    
+    if ('function' === typeof data.toArray) {
+      data = data.toArray();
+    }
 
-    if ('object' == typeof data && data.fulfill) {
-      debug('handling res#send promise');
-      if (req.get('X-MyDB-SocketId')) {
-        debug('mydb - subscribing');
-        data.on('complete', function(err, doc){
-          if (err) return next(err);
+    if (data instanceof Promise) {
+      debug('handling res#send for mongodb promise');
+      if (req.get('X-MyDB-SocketId')) {  
+        data.then(doc => {
           if (!doc || !doc._id) return res.send(404);
-          subscribe(doc._id, data.opts.fields, function(err, id){
+          debug('mydb - subscribing');
+          subscribe(doc._id, Object.keys(doc), function (err, id) {
             if (err) return next(err);
             if (id == req.get('X-MyDB-Id')) {
               debug('subscription id matches one provided by client');
@@ -104,14 +108,14 @@ Expose.prototype.send = function(){
               res.send(doc);
             }
           });
-        });
+        })
+        .catch(next);
       } else {
         debug('no mydb - not subscribing');
-        data.once('complete', function(err, doc){
-          if (err) return next(err);
+        data.then(doc => {
           if (!doc) return res.send(404);
           res.send(doc);
-        });
+        }).catch(next);
       }
     } else {
       res.send.apply(res, arguments);
@@ -148,12 +152,11 @@ Expose.prototype.subscribe = function(){
       fields = null;
     }
 
-    if (data.fulfill) {
-      data.on('complete', function(err, doc){
-        if (err) return fn(err);
-        if (!doc) return fn(new Error('Not found'));
+    if (data instanceof Promise) {
+      data.then(function(doc){
+        if (!doc || !doc._id) return fn(new Error('Not found'));
         to(doc._id, fields || data.opts.fields);
-      });
+      }).catch(fn);
     } else {
       to(data);
     }
@@ -320,7 +323,7 @@ Expose.prototype.routes = function(next){
   if (/^\/session\/?(\?.*)?$/.test(this.req.url) && 'GET' == this.req.method) {
     var col = this.sessions;
     var sid = this.req.session._id;
-    var pro = col.findOne(sid, this.sessionExpose);
+    var pro = col.findOne({ _id: sid }, { fields: this.sessionExpose });
     this.res.send(pro);
   } else {
     next();

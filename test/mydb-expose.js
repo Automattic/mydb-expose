@@ -1,69 +1,80 @@
-
-/**
- * MongoDB URI for tests.
- */
-
-var mongo = 'localhost/mydb-expose-test' || process.env.MONGO_URI;
+"use strict";
 
 /**
  * Test dependencies.
  */
 
-var my = require('..');
-var mydb = require('mydb');
-var http = require('http').Server;
-var monk = require('monk')(mongo);
-var express = require('express');
-var expect = require('expect.js');
-var request = require('supertest');
-
-/**
- * Test collection.
- */
-
-var users = monk.get('users-' + Date.now());
-var woots = monk.get('woots-' + Date.now());
-var sessions = monk.get('sessions');
-
-/**
- * Middleware helper for tests.
- *
- * @api private
- */
-
-function expose(){
-  return my({ mongo: mongo, url: mydb(http()) });
-}
-
-/**
- * Returns the `cookieParser` middleware.
- */
-
-function cookies(){
-  return express.cookieParser();
-}
-
-/**
- * Returns the session middleware.
- *
- * @api private
- */
-
-function session(){
-  return express.session({ secret: 'woot' });
-}
+const mydbExpose = require('..');
+const mydb = require('mydb');
+const http = require('http');
+const express = require('express');
+const expect = require('expect.js');
+const request = require('supertest');
+const mongodb = require('mongodb');
 
 /**
  * Test.
  */
 
 describe('mydb-expose', function(){
+  let db, users, woots, sessions;
 
+  /**
+   * Middleware helper for tests.
+   *
+   * @api private
+   */
+
+  function expose(){
+    return mydbExpose(db, { url: mydb(http.createServer()) });
+  }
+
+  /**
+   * Returns the `cookieParser` middleware.
+   */
+
+  function cookies(){
+    return express.cookieParser();
+  }
+
+  /**
+   * Returns the session middleware.
+   *
+   * @api private
+   */
+
+  function session(){
+    return express.session({ secret: 'woot' });
+  }
+  
+  before(function (done) {
+    mongodb.MongoClient
+      .connect('mongodb://localhost/mydb-expose-test')
+      .then(_db => {
+        db = _db;
+        users = db.collection('users-' + Date.now());
+        woots = db.collection('woots-' + Date.now());
+        sessions = db.collection('sessions');    
+        done();
+      })
+      .catch(done);
+  });
+  
   describe('res#send', function(){
-    var doc1 = { _id: users.id(), tobi: 'rox' };
-    var doc2 = { _id: users.id(), jane: 'too' };
-    users.insert(doc1);
-    users.insert(doc2);
+    
+    let doc1, doc2;
+    
+    before(function(done) {
+      doc1 = { _id: new mongodb.ObjectID(), tobi: 'rox' };
+      doc2 = { _id: new mongodb.ObjectID(), jane: 'too' };
+
+      Promise
+        .all([users.insert(doc1), users.insert(doc2)])
+        .then(() => {
+          done();
+        })
+        .catch(done);
+    })
 
     it('Collection#findOne', function(done){
       var app = express();
@@ -121,7 +132,8 @@ describe('mydb-expose', function(){
         if (err) return done(err);
 
         // we first assert a session doc was created
-        sessions.findOne(res.body._id, function(err, sess){
+        sessions.findOne({ _id: new mongodb.ObjectId(res.body._id) }, function(err, sess){
+          
           if (err) return done(err);
           expect(sess.sid).to.be.a('string');
 
@@ -237,7 +249,7 @@ describe('mydb-expose', function(){
         var cookie = res1.headers['set-cookie'][0].split(';')[0];
 
         request(app)
-        .get('/')
+        .get('/2')
         .set('Cookie', cookie)
         .expect(200)
         .end(function(err, res2){
@@ -273,12 +285,13 @@ describe('mydb-expose', function(){
       .end(function(err, res){
         if (err) return done(err);
         var cookie = res.headers['set-cookie'][0].split(';')[0];
-
+        
         request(app)
         .get('/2')
         .set('Cookie', cookie)
         .end(function(err){
           if (err) return done(err);
+
           var cookie = res.headers['set-cookie'][0].split(';')[0];
 
           request(app)
@@ -289,5 +302,4 @@ describe('mydb-expose', function(){
       });
     });
   });
-
 });

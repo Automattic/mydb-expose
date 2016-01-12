@@ -1,58 +1,61 @@
+"use strict";
 
 /**
  * Module dependencies.
  */
 
-var monk = require('monk');
-var Expose = require('./expose');
+const Expose = require('./expose');
 
 /**
- * Module exports.
- */
-
-module.exports = mydb;
-
-/**
- * Middleware.
+ * `mydb-expose` middleware.
  *
- * @api private
+ * @param {mongodb.Db} database to store sessions in
+ * @param {Object} options
+ * @api public
  */
 
-function mydb(opts){
-  opts = opts || {};
-
-  // mongodb
-  if ('object' != typeof opts.mongo) {
-    opts.mongo = monk(opts.mongo || 'localhost:27017/mydb');
+function mydbExpose(db, options) {
+  if ('undefined' === typeof db) {
+    throw new Error('mydb-expose: No mongodb instance specified.')
   }
 
-  var sessions = opts.mongo.get('sessions');
-  sessions.index('sid');
+  options = options || {};
+  options.session = options.session || {};
 
-  // session exposed fields
-  // XXX: move into `mydb-session`
-  var sessionExpose = opts.sessionExpose || '-sid';
+  // sessions collection
+  // XXX: move session logic into `mydb-session`  
+  let sessions = db.collection(options.session.collection || 'sessions');
+  sessions.ensureIndex('sid');
+
+  // session fields to expose
+  let sessionExpose = options.session.expose || { 'sid': 0 };
 
   // secret
-  var secret = opts.secret || 'youareagoodmydbcracker';
+  let secret = options.secret || 'youareagoodmydbcracker';
 
   // url
-  var url = opts.url;
+  let url = options.url;
 
   if (!url) {
-    throw new Error('Missing `url` (mydb server) option.');
+    throw new Error('mydb-expose: Missing `url` (mydb server) option.');
   }
 
   if (typeof url == 'string') {
-    var _url = url;
+    let _url = url;
     url = function(){
       return _url;
     };
   }
 
   // create middleware
-  return function(req, res, next){
-    var expose = new Expose(url, secret, sessions, sessionExpose);
+  return function (req, res, next) {
+    let expose = new Expose(url, secret, sessions, sessionExpose);
     expose.middleware(req, res, next);
   };
 }
+
+/**
+ * Module exports.
+ */
+
+module.exports = mydbExpose;

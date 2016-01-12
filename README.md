@@ -36,12 +36,8 @@ app.get('/some/doc', function(req, res){
   - `url`
     - a string like `cloudup.mydb.io` or a reference to the `mydb`
       server object in case it's in the same process
-  - `redis`
-    - a redis client instance or
-    - a string like `localhost:6379`
   - `mongo`
-    - a `monk` instance
-    - a string like `localhost:27017/test`
+    - a `mongodb.Db` instance
   - `sessionExpose`
     - fields to expose from the session document (defaults to `'-sid'`)
 

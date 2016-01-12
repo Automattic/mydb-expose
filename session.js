@@ -1,3 +1,4 @@
+"use strict";
 
 /**
  * Module dependencies.
@@ -82,8 +83,14 @@ Session.prototype.reload = function(fn){
   };
   var opts = { upsert: true };
   debug('reload %s', qry.sid);
-  this.$col.findAndModify(qry, { $set: set }, opts, function(err, obj){
+  this.$col.findAndModify(qry, [['sid', 1]], { $set: set }, opts, function(err, obj){
     if (err) return fn(err);
+    if (obj.lastErrorObject && obj.lastErrorObject.upserted) {
+      set._id = obj.lastErrorObject.upserted;
+      obj = set;
+    } else {
+      obj = obj.value;
+    }
     var keys = self.$keys;
     for (var i = 0; i < keys.length; i++) delete self[keys[i]];
     for (var i in obj) self[i] = obj[i];
@@ -102,7 +109,7 @@ Session.prototype.reload = function(fn){
 Session.prototype.save = function(fn){
   fn = fn || noop;
   if (!this._id) return fn(new Error('Session not properly loaded'));
-  debug('saving');
+  debug('saving %j', this.$qry);
   this.$query(this.$qry, fn);
 };
 
@@ -142,7 +149,7 @@ Session.prototype.regenerate = function(fn){
 
 Session.prototype.$query = function(qry, fn){
   if (!this._id) return fn(new Error('Session not properly loaded'));
-  this.$col.update(this._id, qry, fn);
+  this.$col.update({ _id: this._id }, qry, fn);
 };
 
 /**
