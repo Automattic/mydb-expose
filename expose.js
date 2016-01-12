@@ -95,13 +95,13 @@ Expose.prototype.send = function(){
       debug('handling res#send for mongodb promise');
       if (req.get('X-MyDB-SocketId')) {  
         data.then(doc => {
-          if (!doc || !doc._id) return res.send(404);
+          if (!doc || !doc._id) return res.sendStatus(404);
           debug('mydb - subscribing');
           subscribe(doc._id, Object.keys(doc), function (err, id) {
             if (err) return next(err);
             if (id == req.get('X-MyDB-Id')) {
               debug('subscription id matches one provided by client');
-              res.send(304);
+              res.sendStatus(304);
             } else {
               debug('sending new subscription with document');
               res.set('X-MyDB-Id', id);
@@ -113,7 +113,7 @@ Expose.prototype.send = function(){
       } else {
         debug('no mydb - not subscribing');
         data.then(doc => {
-          if (!doc) return res.send(404);
+          if (!doc) return res.sendStatus(404);
           res.send(doc);
         }).catch(next);
       }

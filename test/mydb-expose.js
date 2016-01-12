@@ -11,6 +11,7 @@ const express = require('express');
 const expect = require('expect.js');
 const request = require('supertest');
 const mongodb = require('mongodb');
+const expressSession = require('express-session');
 
 /**
  * Test.
@@ -30,21 +31,13 @@ describe('mydb-expose', function(){
   }
 
   /**
-   * Returns the `cookieParser` middleware.
-   */
-
-  function cookies(){
-    return express.cookieParser();
-  }
-
-  /**
    * Returns the session middleware.
    *
    * @api private
    */
 
   function session(){
-    return express.session({ secret: 'woot' });
+    return expressSession({ secret: 'woot', resave: false, saveUninitialized: true });
   }
   
   before(function (done) {
@@ -78,7 +71,6 @@ describe('mydb-expose', function(){
 
     it('Collection#findOne', function(done){
       var app = express();
-      app.use(cookies());
       app.use(session());
       app.use(expose());
       app.get('/doc', function(req, res){
@@ -92,7 +84,6 @@ describe('mydb-expose', function(){
 
     it('Collection#find', function(done){
       var app = express();
-      app.use(cookies());
       app.use(session());
       app.use(expose());
       app.get('/document', function(req, res){
@@ -106,7 +97,6 @@ describe('mydb-expose', function(){
 
     it('Collection#find + 404', function(done){
       var app = express();
-      app.use(cookies());
       app.use(session());
       app.use(expose());
       app.get('/missing-doc', function(req, res){
@@ -125,7 +115,6 @@ describe('mydb-expose', function(){
   describe('/session', function(){
     it('responds json', function(done){
       var app = express();
-      app.use(cookies());
       app.use(session());
       app.use(expose());
       request(app).get('/session').end(function(err, res){
@@ -152,7 +141,6 @@ describe('mydb-expose', function(){
 
     it('ignores non-GET', function(done){
       var app = express();
-      app.use(cookies());
       app.use(session());
       app.use(expose());
       request(app).post('/session').end(function(err, res){
@@ -164,7 +152,6 @@ describe('mydb-expose', function(){
 
     it('responds with a mydb id', function(done){
       var app = express();
-      app.use(cookies());
       app.use(session());
       app.use(expose());
       app.get('/', function(req, res, next){
@@ -190,7 +177,6 @@ describe('mydb-expose', function(){
 
     it('responds with 304', function(done){
       var app = express();
-      app.use(cookies());
       app.use(session());
       app.use(expose());
       app.get('/', function(req, res, next){
@@ -231,7 +217,6 @@ describe('mydb-expose', function(){
   describe('req#session', function(){
     it('automatically populated', function(done){
       var app = express();
-      app.use(cookies());
       app.use(session());
       app.use(expose());
       app.get('/', function(req, res, next){
@@ -261,22 +246,21 @@ describe('mydb-expose', function(){
 
     it('supports operations', function(done){
       var app = express();
-      app.use(cookies());
       app.use(session());
       app.use(expose());
 
       app.get('/', function(req, res, next){
-        res.send(200);
+        res.sendStatus(200);
       });
       app.get('/2', function(req, res, next){
         req.session.set('woot', 'a');
         req.session.push('likes', 'ferrets');
-        res.send(200);
+        res.sendStatus(200);
       });
       app.get('/3', function(req, res, next){
         expect(req.session.woot).to.be('a');
         expect(req.session.likes).to.eql(['ferrets']);
-        res.send(200);
+        res.sendStatus(200);
       });
 
       request(app)

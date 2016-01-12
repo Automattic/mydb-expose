@@ -9,7 +9,8 @@
     "debug": "~2.2.0"
   },
   "devDependencies": {
-    "express": "3.0.0rc4",
+    "express": "4.13.3",
+    "express-session": "1.13.0",
     "mocha": "~2.3.4",
     "supertest": "~1.1.0",
     "expect.js": "~0.3.1",
