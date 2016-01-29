@@ -1,6 +1,6 @@
 {
   "name": "mydb-expose",
-  "version": "3.0.0-alpha.2",
+  "version": "3.0.0-alpha.3",
   "description": "mydb express middleware",
   "repository": {
     "git": "git@github.com:Automattic/mydb-expose.git"
