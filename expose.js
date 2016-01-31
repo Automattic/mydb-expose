@@ -84,7 +84,7 @@ Expose.prototype.send = function(){
   var next = req.next;
   var self = this;
 
-  return function (data) {
+  return function (data, fields) {
     res.send = send;
     
     if ('function' === typeof data.toArray) {
@@ -97,7 +97,7 @@ Expose.prototype.send = function(){
         data.then(doc => {
           if (!doc || !doc._id) return (res.sendStatus || res.send).call(res, 404);
           debug('mydb - subscribing');
-          subscribe(doc._id, Object.keys(doc), function (err, id) {
+          subscribe(doc._id, fields || Object.keys(doc), function (err, id) {
             if (err) return next(err);
             if (id == req.get('X-MyDB-Id')) {
               debug('subscription id matches one provided by client');
