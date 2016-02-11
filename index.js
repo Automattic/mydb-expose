@@ -25,6 +25,14 @@ function mydbExpose(db, options) {
   // sessions collection
   // XXX: move session logic into `mydb-session`  
   let sessions = db.collection(options.session.collection || 'sessions');
+
+  let observer;
+  if (options.redis) {
+    // make sure session updates are published to mydb
+    observer = new MyDBObserver(options.redis);
+    observer.observe(sessions);
+  }
+
   sessions.ensureIndex('sid');
 
   // session fields to expose
