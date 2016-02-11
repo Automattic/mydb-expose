@@ -5,6 +5,7 @@
  */
 
 const Expose = require('./expose');
+const MyDBObserver = require('mydb-observer');
 
 /**
  * `mydb-expose` middleware.
