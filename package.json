@@ -10,7 +10,7 @@
     "superagent": "~1.6.1",
     "uid2": "~0.0.3",
     "debug": "~2.2.0",
-    "mydb-observer": "1.0.0-alpha.3"
+    "mydb-observer": "1.0.0"
   },
   "peerDependencies": {
     "mongodb": "~2.2.19",
