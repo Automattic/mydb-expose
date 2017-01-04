@@ -1,4 +1,10 @@
 
+3.0.0 / 2017-01-04
+==================
+
+ * Breaking API change: `monk` is no longer supported, this package
+   now uses the mongodb driver directly.
+
 2.1.2 / 2015-03-31
 ==================
 
