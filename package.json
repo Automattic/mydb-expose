@@ -7,23 +7,23 @@
   },
   "license": "MIT",
   "dependencies": {
-    "superagent": "~1.6.1",
-    "uid2": "~0.0.3",
     "debug": "~2.2.0",
-    "mydb-observer": "1.0.0"
+    "mydb-observer": "https://github.com/Automattic/mydb-observer.git",
+    "superagent": "~1.6.1",
+    "uid2": "~0.0.3"
   },
   "peerDependencies": {
-    "mongodb": "~2.2.19",
+    "mongodb": "^3.7.3",
     "redis": "~2.6.3"
   },
   "devDependencies": {
-    "mongodb": "~2.2.19",
+    "expect.js": "~0.3.1",
     "express": "4.13.3",
     "express-session": "~1.13.0",
     "mocha": "~2.3.4",
-    "supertest": "~1.1.0",
-    "expect.js": "~0.3.1",
+    "mongodb": "^3.7.3",
     "mydb": "~3.2.0",
-    "redis": "~2.6.3"
+    "redis": "~2.6.3",
+    "supertest": "~1.1.0"
   }
 }
