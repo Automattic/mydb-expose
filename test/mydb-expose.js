@@ -42,9 +42,9 @@ describe('mydb-expose', function(){
   
   before(function (done) {
     mongodb.MongoClient
-      .connect('mongodb://localhost/mydb-expose-test')
-      .then(_db => {
-        db = _db;
+      .connect('mongodb://localhost:31003')
+      .then(_client => {
+        db = _client.db('mydb-expose-test');
         users = db.collection('users-' + Date.now());
         woots = db.collection('woots-' + Date.now());
         sessions = db.collection('sessions');    

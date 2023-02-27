@@ -14,7 +14,7 @@
   },
   "peerDependencies": {
     "mongodb": "^3.7.3",
-    "redis": "~2.6.3"
+    "redis": "^4.6.5"
   },
   "devDependencies": {
     "expect.js": "~0.3.1",
@@ -23,7 +23,7 @@
     "mocha": "~2.3.4",
     "mongodb": "^3.7.3",
     "mydb": "~3.2.0",
-    "redis": "~2.6.3",
+    "redis": "^4.6.5",
     "supertest": "~1.1.0"
   }
 }
