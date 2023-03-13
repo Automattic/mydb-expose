@@ -7,9 +7,9 @@
   },
   "license": "MIT",
   "dependencies": {
-    "debug": "~2.2.0",
+    "debug": "^2.6.9",
     "mydb-observer": "https://github.com/Automattic/mydb-observer.git",
-    "superagent": "~1.6.1",
+    "superagent": "^8.0.9",
     "uid2": "~0.0.3"
   },
   "peerDependencies": {
@@ -18,12 +18,12 @@
   },
   "devDependencies": {
     "expect.js": "~0.3.1",
-    "express": "4.13.3",
-    "express-session": "~1.13.0",
-    "mocha": "~2.3.4",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "mocha": "^10.2.0",
     "mongodb": "^3.7.3",
-    "mydb": "~3.2.0",
+    "mydb": "Automattic/mydb#update/fix-node-vulns-node-18",
     "redis": "^4.6.5",
-    "supertest": "~1.1.0"
+    "supertest": "^6.3.3"
   }
 }
