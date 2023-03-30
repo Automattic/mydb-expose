@@ -4,10 +4,7 @@
  * Module dependencies.
  */
 
-const qs = require('querystring');
-const url = require('url');
 const uid = require('uid2');
-const http = require('http');
 const crypto = require('crypto');
 const request = require('superagent');
 const Session = require('./session');

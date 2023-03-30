@@ -83,13 +83,13 @@ Session.prototype.reload = function(fn){
   };
   var opts = { upsert: true };
   debug('reload %s', qry.sid);
-  this.$col.findAndModify(qry, [['sid', 1]], { $set: set }, opts, function(err, obj){
+  this.$col.findAndModify(qry, { $set: set }, opts, function(err, obj){
     if (err) return fn(err);
     if (obj.lastErrorObject && obj.lastErrorObject.upserted) {
       set._id = obj.lastErrorObject.upserted;
       obj = set;
     } else {
-      obj = obj.value;
+      obj = obj.sid;
     }
     var keys = self.$keys;
     for (var i = 0; i < keys.length; i++) delete self[keys[i]];
